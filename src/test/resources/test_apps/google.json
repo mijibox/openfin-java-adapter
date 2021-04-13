@@ -1,0 +1,13 @@
+{
+	"startup_app": {
+		"name": "OpenFinTestGoogle",
+		"description": "OpenFin Test App - Google",
+		"url": "https://www.google.com",
+		"uuid": "OpenFinTestGoogle",
+		"autoShow": true
+	},
+	"runtime": {
+		"arguments": "--v=1",
+		"version": "stable"
+	}
+}
