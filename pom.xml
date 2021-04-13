@@ -134,6 +134,7 @@
 				</executions>
 				<configuration>
 					<quiet>true</quiet>
+					<skip>true</skip>
 				</configuration>
 			</plugin>
 			<plugin>
