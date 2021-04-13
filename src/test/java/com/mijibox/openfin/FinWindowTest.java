@@ -192,7 +192,7 @@ public class FinWindowTest {
 	@Test
 	public void setGetZoomLevel() throws Exception {
 		int zoomLevel = 3;
-		TestUtils.runSync(ofWindowObject.setZoomLevel(zoomLevel));
+		ofWindowObject.setZoomLevel(zoomLevel); //this doesn't return when running in scaled env.
 		Thread.sleep(1000);
 		Integer gotZoomLevel = TestUtils.runSync(ofWindowObject.getZoomLevel());
 		assertEquals(zoomLevel, gotZoomLevel.intValue());
