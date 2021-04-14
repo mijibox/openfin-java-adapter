@@ -14,6 +14,20 @@ public interface FinLauncherBuilder {
 	public FinLauncherBuilder openFinDirectory(Path openFinDirectory);
 
 	public FinLauncherBuilder runtimeConfig(RuntimeConfig runtimeConfig);
+	
+	/**
+	 * convenient way to set runtimeConfig.runtime.version.
+	 * @param version
+	 * @return 
+	 */
+	public FinLauncherBuilder runtimeVersion(String version);
+	
+	/**
+	 * skip port discovery, connect directly to specified websocket port
+	 * @param port
+	 * @return
+	 */
+	public FinLauncherBuilder runtimePort(Integer port);
 
 	public FinLauncherBuilder connectionListener(FinRuntimeConnectionListener listener);
 	

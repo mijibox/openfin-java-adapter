@@ -50,10 +50,17 @@ public abstract class AbstractFinLauncher implements FinLauncher {
 
 	AbstractFinLauncher(AbstractFinLauncherBuilder builder) {
 		this.builder = builder;
-		this.namedPipeName = UUID.randomUUID().toString();
 		try {
-			this.configPath = this.createStartupConfig(Platform.isWindows() ? namedPipeName
-					: "/" + PosixPortDiscoverer.getNamedPipeFilePath(namedPipeName));
+			if (this.builder.getRuntimePort() != null) {
+				//user wants to connect to specified port, so no need to do port discovery/create named pipe.
+				this.configPath = this.createStartupConfig(null);
+			}
+			else {
+				this.namedPipeName = UUID.randomUUID().toString();
+				this.configPath = this.createStartupConfig(Platform.isWindows() ? namedPipeName
+						: "/" + PosixPortDiscoverer.getNamedPipeFilePath(namedPipeName));
+				
+			}
 		}
 		catch (IOException e) {
 			e.printStackTrace();
@@ -156,16 +163,18 @@ public abstract class AbstractFinLauncher implements FinLauncher {
 
 	private Path createStartupConfig(String namedPipeName) throws IOException {
 		JsonObject runtimeConfigJson = FinBeanUtils.toJsonObject(this.builder.getRuntimeConfig());
-		if (runtimeConfigJson.getJsonObject("runtime").containsKey("arguments")) {
-			String orgArgs = runtimeConfigJson.getJsonObject("runtime").getString("arguments");
-			runtimeConfigJson = Json.createPatchBuilder()
-					.replace("/runtime/arguments", orgArgs + " --runtime-information-channel-v6=" + namedPipeName)
-					.build().apply(runtimeConfigJson);
-		}
-		else {
-			runtimeConfigJson = Json.createPatchBuilder()
-					.add("/runtime/arguments", "--runtime-information-channel-v6=" + namedPipeName).build()
-					.apply(runtimeConfigJson);
+		if(namedPipeName != null) {
+			if (runtimeConfigJson.getJsonObject("runtime").containsKey("arguments")) {
+				String orgArgs = runtimeConfigJson.getJsonObject("runtime").getString("arguments");
+				runtimeConfigJson = Json.createPatchBuilder()
+						.replace("/runtime/arguments", orgArgs + " --runtime-information-channel-v6=" + namedPipeName)
+						.build().apply(runtimeConfigJson);
+			}
+			else {
+				runtimeConfigJson = Json.createPatchBuilder()
+						.add("/runtime/arguments", "--runtime-information-channel-v6=" + namedPipeName).build()
+						.apply(runtimeConfigJson);
+			}
 		}
 
 		Path config = Files.createTempFile("OpenFinRuntimeConfig", ".json");
@@ -209,22 +218,31 @@ public abstract class AbstractFinLauncher implements FinLauncher {
 				int port = payload.getInt("port");
 				logger.info("requested version: {}", requestedVersion);
 				logger.info("version: {}", version);
-				logger.debug("port: {}", port);
+				logger.info("port: {}", port);
 				return port;
 			}
 		});
 	}
 	
 	public CompletionStage<FinConnectionImpl> getOpenFinRuntimeConnection() {
-		return this.startProcess().thenCompose(process->{
-			return this.findPortNumber(namedPipeName);
-		}).thenApply(port->{
-			return new FinConnectionImpl(this.builder.getConnectionUuid(), port,
+		if (this.builder.getRuntimePort() != null) {
+			//no need to start another process, just connect to the specified port
+			FinConnectionImpl conn = new FinConnectionImpl(this.builder.getConnectionUuid(), this.builder.getRuntimePort(),
 					this.builder.getRuntimeConfig().getLicenseKey(), configPath.toUri().toString(),
 					builder.getExecutor(), builder.getRuntimeConfig().getNonPersistent());
-		}).thenCompose(connection -> {
-			return connection.connect();
-		});
+			return conn.connect();
+		}
+		else {
+			return this.startProcess().thenCompose(process->{
+				return this.findPortNumber(namedPipeName);
+			}).thenApply(port->{
+				return new FinConnectionImpl(this.builder.getConnectionUuid(), port,
+						this.builder.getRuntimeConfig().getLicenseKey(), configPath.toUri().toString(),
+						builder.getExecutor(), builder.getRuntimeConfig().getNonPersistent());
+			}).thenCompose(connection -> {
+				return connection.connect();
+			});
+		}
 	}
 	
 

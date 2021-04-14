@@ -103,17 +103,4 @@ public class FinRvmLauncher extends AbstractFinLauncher {
 		});
 	}
 
-	@Override
-	public CompletionStage<FinConnectionImpl> getOpenFinRuntimeConnection() {
-		logger.info("launching OpenFinRVM");
-		return this.startProcess().thenCompose(process->{
-			return this.findPortNumber(namedPipeName);
-		}).thenApply(port->{
-			return new FinConnectionImpl(this.builder.getConnectionUuid(), port,
-					this.builder.getRuntimeConfig().getLicenseKey(), configPath.toUri().toString(),
-					builder.getExecutor(), builder.getRuntimeConfig().getNonPersistent());
-		}).thenCompose(connection -> {
-			return connection.connect();
-		});
-	}
 }

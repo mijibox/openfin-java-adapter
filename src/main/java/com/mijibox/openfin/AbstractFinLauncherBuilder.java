@@ -22,6 +22,7 @@ public abstract class AbstractFinLauncherBuilder implements FinLauncherBuilder {
 	protected String assetsUrl;
 	protected Path openFinDirectory;
 	protected RuntimeConfig runtimeConfig;
+	protected Integer runtimePort;
 	protected FinRuntimeConnectionListener listener;
 	protected String connectionUuid;
 	protected Executor executor;
@@ -134,4 +135,19 @@ public abstract class AbstractFinLauncherBuilder implements FinLauncherBuilder {
 		return this.executor;
 	}
 	
+	@Override
+	public FinLauncherBuilder runtimePort(Integer port) {
+		this.runtimePort = port;
+		return this;
+	}
+	
+	Integer getRuntimePort() {
+		return this.runtimePort;
+	}
+	
+	@Override
+	public FinLauncherBuilder runtimeVersion(String version) {
+		this.getRuntimeConfig().getRuntime().setVersion(version);
+		return this;
+	}
 }

@@ -233,7 +233,7 @@ public class FinRuntimeLauncherTest {
 
 		Thread.sleep(5000);
 		
-		fin.disconnect();
+		TestUtils.runSync(fin.System.exit());
 	}
 	
 	@Test
@@ -242,5 +242,32 @@ public class FinRuntimeLauncherTest {
 		FinApplicationObject app = TestUtils.runSync(fin.Application.startFromManifest(TestUtils.getTestManifestUrl("google")));
 		TestUtils.runSync(app.getWindow().close());
 		fin.disconnect();
+	}
+	
+	@Test
+	public void skipPortDiscovery() throws Exception {
+		FinRuntime runtime = TestUtils.runSync(new FinRvmLauncherBuilder().build().launch()); //start a runtime process, if 9696 is not already taken, then this one will take the default port
+		assertNotNull(runtime);
+		FinRuntime runtime1 = TestUtils.runSync(new FinRvmLauncherBuilder().runtimePort(9696).build().launch()); 
+		assertNotNull(runtime1);
+		TestUtils.runSync(runtime1.disconnect());
+		Thread.sleep(1000);
+		FinRuntime runtime2 = TestUtils.runSync(new FinRuntimeLauncherBuilder().runtimePort(9696).build().launch()); 
+		assertNotNull(runtime2);
+		TestUtils.runSync(runtime2.disconnect());
+		TestUtils.runSync(runtime.disconnect());
+	}
+
+	@Test
+	public void runtimeVersion() throws Exception {
+		String requestedVersion = "18.87.57.37";
+		FinRuntime runtime = TestUtils.runSync(new FinRvmLauncherBuilder().runtimeVersion(requestedVersion).build().launch());
+		assertNotNull(runtime);
+		assertEquals(requestedVersion, runtime.getVersion());
+		TestUtils.runSync(runtime.disconnect());
+		Thread.sleep(1000);
+		FinRuntime runtime2 = TestUtils.runSync(new FinRuntimeLauncherBuilder().runtimeVersion(requestedVersion).build().launch());
+		assertNotNull(runtime2);
+		assertEquals(requestedVersion, runtime2.getVersion());
 	}
 }
