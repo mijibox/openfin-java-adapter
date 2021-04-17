@@ -13,7 +13,6 @@ import javax.json.JsonString;
 import javax.json.JsonValue;
 
 import com.mijibox.openfin.bean.AppInfo;
-import com.mijibox.openfin.bean.ApplicationInfo;
 import com.mijibox.openfin.bean.ClearCacheOption;
 import com.mijibox.openfin.bean.CookieDetails;
 import com.mijibox.openfin.bean.CookieInfo;
@@ -108,7 +107,6 @@ public class FinSystem extends FinApiObject {
 	 */
 	public CompletionStage<Void> exit() {
 		return this.finConnection.sendMessage("exit-desktop").thenAccept(ack ->{
-			//will it definitely get the ack?
 			if (!ack.isSuccess()) {
 				throw new RuntimeException("error exit-desktop, reason: " + ack.getReason());
 			}

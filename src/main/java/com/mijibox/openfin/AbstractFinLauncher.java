@@ -228,8 +228,8 @@ public abstract class AbstractFinLauncher implements FinLauncher {
 		if (this.builder.getRuntimePort() != null) {
 			//no need to start another process, just connect to the specified port
 			FinConnectionImpl conn = new FinConnectionImpl(this.builder.getConnectionUuid(), this.builder.getRuntimePort(),
-					this.builder.getRuntimeConfig().getLicenseKey(), configPath.toUri().toString(),
-					builder.getExecutor(), builder.getRuntimeConfig().getNonPersistent());
+					this.builder.getRuntimeConfig().getLicenseKey(), configPath.toUri().toString(), builder.getExecutor(),
+					builder.getRuntimeConfig().getNonPersistent());
 			return conn.connect();
 		}
 		else {
@@ -237,8 +237,8 @@ public abstract class AbstractFinLauncher implements FinLauncher {
 				return this.findPortNumber(namedPipeName);
 			}).thenApply(port->{
 				return new FinConnectionImpl(this.builder.getConnectionUuid(), port,
-						this.builder.getRuntimeConfig().getLicenseKey(), configPath.toUri().toString(),
-						builder.getExecutor(), builder.getRuntimeConfig().getNonPersistent());
+						this.builder.getRuntimeConfig().getLicenseKey(), configPath.toUri().toString(), builder.getExecutor(),
+						builder.getRuntimeConfig().getNonPersistent());
 			}).thenCompose(connection -> {
 				return connection.connect();
 			});

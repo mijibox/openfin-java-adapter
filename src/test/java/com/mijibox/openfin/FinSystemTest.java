@@ -85,33 +85,17 @@ public class FinSystemTest {
 		};
 		TestUtils.runSync(fin.System.addEventListener(eventType, listener));
 		FinApplicationObject appObj = TestUtils.runSync(fin.Application.startFromManifest("https://cdn.openfin.co/demos/hello/app.json"));
-		try {
-			TestUtils.runSync(appObj.terminate());
-		}
-		catch (Exception ex) {
-			//openfin bug
-		}
+		appObj.terminate();
 		latch.await(20, TimeUnit.SECONDS);
 		assertEquals(0, latch.getCount());
 		TestUtils.runSync(fin.System.removeEventListener(eventType, listener));
 		FinApplicationObject appObj2 = TestUtils.runSync(fin.Application.startFromManifest("https://cdn.openfin.co/demos/hello/app.json"));
-		try {
-			TestUtils.runSync(appObj2.terminate());
-		}
-		catch (Exception ex) {
-			//openfin bug
-		}
+		appObj2.terminate();
 		latch2.await(10, TimeUnit.SECONDS);
 		assertEquals(1, latch2.getCount());
 		TestUtils.runSync(fin.System.addEventListener(eventType, listener));
 		FinApplicationObject appObj3 = fin.Application.startFromManifest("https://cdn.openfin.co/demos/hello/app.json").toCompletableFuture().get(10, TimeUnit.SECONDS);
-		try {
-			TestUtils.runSync(appObj3.terminate());
-		}
-		catch (Exception ex) {
-			//openfin bug
-		}
-		
+		appObj3.terminate();
 		latch2.await(10, TimeUnit.SECONDS);
 		assertEquals(0, latch2.getCount());
 	}
@@ -130,7 +114,7 @@ public class FinSystemTest {
 	public void exit() throws Exception {
 		CountDownLatch latch = new CountDownLatch(1);
 		RuntimeConfig config = new RuntimeConfig();
-		config.getRuntime().setVersion("17.85.55.39"); //intentionally use different version, otherwise it might exit the current runtime.
+		config.getRuntime().setVersion("stable-v17"); //intentionally use different version, otherwise it might exit the current runtime.
 		FinRuntime runtime = TestUtils.runSync(FinLauncher.newLauncherBuilder()
 				.runtimeConfig(config)
 				.connectionListener(new FinRuntimeConnectionListener() {
@@ -138,7 +122,10 @@ public class FinSystemTest {
 					public void onClose(String reason) {
 						latch.countDown();
 					}
-				}).build().launch(), 180);
+				}).build().launch().exceptionally(e->{
+					e.printStackTrace();
+					return null;
+				}), 180);
 		TestUtils.runSync(runtime.System.exit());
 		
 		latch.await(10, TimeUnit.SECONDS);
@@ -258,5 +245,20 @@ public class FinSystemTest {
 		assumeTrue(Platform.isWindows());
 		RvmInfo rvmInfo = TestUtils.runSync(fin.System.getRvmInfo());
 		assertNotNull(rvmInfo);
+	}
+	
+	@Test
+	public void manyMessages() throws Exception {
+		int msgCnt = 1000;
+		CountDownLatch latch = new CountDownLatch(msgCnt);
+		for (int i=0; i<msgCnt; i++) {
+			int requestId = i;
+			fin.System.getVersion().thenAccept(v->{
+				logger.debug("requeset {}: {}", requestId, v);
+				latch.countDown();
+			});
+		}
+		latch.await(20, TimeUnit.SECONDS);
+		assertEquals(0, latch.getCount());
 	}
 }

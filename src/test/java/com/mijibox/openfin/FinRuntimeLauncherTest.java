@@ -106,26 +106,29 @@ public class FinRuntimeLauncherTest {
 	public void rvmLauncherLaunch() throws Exception {
 		assumeTrue(Platform.isWindows());
 		FinRvmLauncher launcher = new FinRvmLauncher(new FinRvmLauncherBuilder());
-		FinRuntime runtime = launcher.launch().toCompletableFuture().get(10, TimeUnit.SECONDS);
+		FinRuntime runtime = TestUtils.runSync(launcher.launch());
 		assertNotNull(runtime);
-		runtime.disconnect();
+		TestUtils.runSync(runtime.System.exit());
+		Thread.sleep(2000);
 	}
 	
 	@Test
 	public void runtimeLauncherLaunch() throws Exception {
 		FinRuntimeLauncherBuilder builder = new FinRuntimeLauncherBuilder();
 		FinRuntimeLauncher launcher = new FinRuntimeLauncher(builder);
-		FinRuntime runtime = launcher.launch().toCompletableFuture().get(10, TimeUnit.SECONDS);
+		FinRuntime runtime = TestUtils.runSync(launcher.launch());
 		assertNotNull(runtime);
-		runtime.disconnect();
+		TestUtils.runSync(runtime.System.exit());
+		Thread.sleep(2000);
 	}
 
 	@Test
 	public void launch() throws Exception {
 		FinLauncher launcher = FinLauncher.newLauncherBuilder().build();
-		FinRuntime runtime = launcher.launch().toCompletableFuture().get(20, TimeUnit.SECONDS);
+		FinRuntime runtime = TestUtils.runSync(launcher.launch());
 		assertNotNull(runtime);
-		runtime.disconnect();
+		TestUtils.runSync(runtime.System.exit());
+		Thread.sleep(2000);
 	}
 	
 	@Test
@@ -144,7 +147,7 @@ public class FinRuntimeLauncherTest {
 			}
 		}).build();
 
-		launcher.launch();
+		FinRuntime runtime = TestUtils.runSync(launcher.launch());
 		
 		latch.await(10, TimeUnit.SECONDS);
 		
@@ -154,14 +157,15 @@ public class FinRuntimeLauncherTest {
 	@Test
 	public void duplicateConnectionUuid() throws Exception {
 		String connectionUuid = "myConnectionUuid";
-		FinRuntime runtime1 = FinLauncher.newLauncherBuilder().connectionUuid(connectionUuid).build().launch().toCompletableFuture().get(10, TimeUnit.SECONDS);
-		FinRuntime runtime2 = FinLauncher.newLauncherBuilder().connectionUuid(connectionUuid).build().launch().exceptionally(e->{
-//			logger.debug("error creating openfin connection", e);
+		CompletableFuture<?> exceptionFuture = new CompletableFuture<>();
+		FinLauncher.newLauncherBuilder().connectionUuid(connectionUuid).build().launch().thenCompose(runtime1 ->{
+			return FinLauncher.newLauncherBuilder().connectionUuid(connectionUuid).build().launch();
+		}).exceptionally(e->{
+			e.printStackTrace();
+			exceptionFuture.complete(null);
 			return null;
-		}).toCompletableFuture().get(10, TimeUnit.SECONDS);
-		
-		assertNotNull(runtime1);
-		assertNull(runtime2);
+		});
+		TestUtils.runSync(exceptionFuture);
 	}
 
 	@Test
@@ -180,6 +184,7 @@ public class FinRuntimeLauncherTest {
 		assertNotNull(runtime1);
 		assertNull(runtime2);
 		TestUtils.runSync(runtime1.System.exit());
+		Thread.sleep(2000);
 	}
 	
 	@Test
@@ -231,9 +236,10 @@ public class FinRuntimeLauncherTest {
 
 		FinRuntime fin = TestUtils.runSync(FinLauncher.newLauncherBuilder().runtimeConfig(config).build().launch());
 
-		Thread.sleep(5000);
+		Thread.sleep(2000);
 		
 		TestUtils.runSync(fin.System.exit());
+		Thread.sleep(2000);
 	}
 	
 	@Test
@@ -241,7 +247,8 @@ public class FinRuntimeLauncherTest {
 		FinRuntime fin = TestUtils.runSync(FinLauncher.newLauncherBuilder().build().launch());
 		FinApplicationObject app = TestUtils.runSync(fin.Application.startFromManifest(TestUtils.getTestManifestUrl("google")));
 		TestUtils.runSync(app.getWindow().close());
-		fin.disconnect();
+		TestUtils.runSync(fin.System.exit());
+		Thread.sleep(2000);
 	}
 	
 	@Test

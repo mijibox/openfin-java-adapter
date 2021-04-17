@@ -43,7 +43,7 @@ import com.mijibox.openfin.bean.WindowUpdatableOptions;
 public class FinWindowTest {
 	private final static Logger logger = LoggerFactory.getLogger(FinWindowTest.class);
 
-	private static String version = "stable";
+	private static String version = "stable-v18";
 	private static FinRuntime fin;
 	private static FinApplicationObject ofApplicationObject;
 
@@ -120,7 +120,7 @@ public class FinWindowTest {
 	@Test
 	public void flash() throws Exception {
 		TestUtils.runSync(ofWindowObject.flash());
-		Thread.sleep(2000);
+		Thread.sleep(1000);
 		TestUtils.runSync(ofWindowObject.stopFlashing());
 //		Thread.sleep(3000);
 	}
@@ -208,7 +208,7 @@ public class FinWindowTest {
 		TestUtils.runSync(ofWindowObject.findInPage("Gmail", options));
 		Thread.sleep(1000);
 		TestUtils.runSync(ofWindowObject.stopFindInPage(FinWindowObject.FindInPageAction.ACTIVATE_SELECTION));
-		Thread.sleep(2000);
+		Thread.sleep(1000);
 	}
 	
 	@Test
@@ -225,7 +225,7 @@ public class FinWindowTest {
 	public void print() throws Exception {
 //		OfUtils.runSync(ofWindowObject.print(null));
 		
-		Thread.sleep(2000);
+		Thread.sleep(1000);
 		
 		PrintOptions opts = new PrintOptions();
 		opts.setCopies(2);
@@ -253,14 +253,14 @@ public class FinWindowTest {
 	public void disableEnableUserMovement() throws Exception {
 		TestUtils.runSync(ofWindowObject.disableUserMovement().thenCompose(v->{
 			try {
-				Thread.sleep(2000);
+				Thread.sleep(1000);
 			}
 			catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 			return ofWindowObject.enableUserMovement().thenAccept(v2->{
 				try {
-					Thread.sleep(2000);
+					Thread.sleep(1000);
 				}
 				catch (InterruptedException e) {
 					e.printStackTrace();
@@ -335,11 +335,14 @@ public class FinWindowTest {
 		winOpts.setAutoShow(true);
 		FinWindowObject newWindow = TestUtils.runSync(ofApplicationObject.createChildWindow(winOpts));
 		assertNotNull(newWindow);
-		TestUtils.runSync(ofWindowObject.joinGroup(newWindow).thenAccept(v->{
-			FinWindowObject[] groupWins = TestUtils.runSync(ofWindowObject.getGroup());
-			assertEquals(2, groupWins.length);
-			ofWindowObject.leaveGroup().thenAccept(v2->{
-				FinWindowObject[] groupWins2 = TestUtils.runSync(ofWindowObject.getGroup());
+		TestUtils.runSync(ofWindowObject.joinGroup(newWindow).thenCompose(v->{
+			return ofWindowObject.getGroup().thenAccept(groupWins->{
+				assertEquals(2, groupWins.length);
+			}).thenCompose(v2->{
+				return ofWindowObject.leaveGroup();
+			}).thenCompose(v3->{
+				return ofWindowObject.getGroup();
+			}).thenAccept(groupWins2->{
 				assertEquals(0, groupWins2.length);
 			});
 		}));
@@ -348,33 +351,33 @@ public class FinWindowTest {
 	@Test
 	public void windowStates() throws Exception {
 		TestUtils.runSync(ofWindowObject.maximize());
-		Thread.sleep(2000);
+		Thread.sleep(1000);
 		TestUtils.runSync(ofWindowObject.restore());
-		Thread.sleep(2000);
+		Thread.sleep(1000);
 		TestUtils.runSync(ofWindowObject.minimize());
-		Thread.sleep(2000);
+		Thread.sleep(1000);
 		TestUtils.runSync(ofWindowObject.restore());
-		Thread.sleep(2000);
+		Thread.sleep(1000);
 	}
 
 	@Test
 	public void resize() throws Exception {
 		TestUtils.runSync(ofWindowObject.resizeTo(500, 500));
-		Thread.sleep(2000);
+		Thread.sleep(1000);
 		TestUtils.runSync(ofWindowObject.resizeTo(200, 200, Anchor.BOTTOM_LEFT));
-		Thread.sleep(2000);
+		Thread.sleep(1000);
 		TestUtils.runSync(ofWindowObject.resizeBy(200, 200));
-		Thread.sleep(2000);
+		Thread.sleep(1000);
 		TestUtils.runSync(ofWindowObject.resizeBy(-100, -100, Anchor.BOTTOM_RIGHT));
-		Thread.sleep(2000);
+		Thread.sleep(1000);
 	}
 
 	@Test
 	public void move() throws Exception {
 		TestUtils.runSync(ofWindowObject.moveTo(500, 500));
-		Thread.sleep(2000);
+		Thread.sleep(1000);
 		TestUtils.runSync(ofWindowObject.moveBy(-200, -200));
-		Thread.sleep(2000);
+		Thread.sleep(1000);
 	}
 
 	@Test
@@ -387,33 +390,33 @@ public class FinWindowTest {
 		assertNotNull(newWindow);
 
 		TestUtils.runSync(ofWindowObject.setAsForeground());
-		Thread.sleep(2000);
+		Thread.sleep(1000);
 		TestUtils.runSync(newWindow.setAsForeground());
-		Thread.sleep(2000);
+		Thread.sleep(1000);
 	}
 
 	@Test
 	public void setBounds() throws Exception {
 		Bounds b = new Bounds(0, 0, 300, 300);
 		TestUtils.runSync(ofWindowObject.setBounds(b));
-		Thread.sleep(2000);
+		Thread.sleep(1000);
 		b = new Bounds();
 		b.setWidth(1500);
-		Thread.sleep(2000);
+		Thread.sleep(1000);
 		TestUtils.runSync(ofWindowObject.setBounds(b));
-		Thread.sleep(2000);
+		Thread.sleep(1000);
 		b = new Bounds();
 		b.setTop(500);
 		TestUtils.runSync(ofWindowObject.setBounds(b));
-		Thread.sleep(2000);
+		Thread.sleep(1000);
 	}
 	
 	@Test
 	public void showAt() throws Exception {
 		TestUtils.runSync(ofWindowObject.showAt(500, 300, false));
-		Thread.sleep(2000);
+		Thread.sleep(1000);
 		TestUtils.runSync(ofWindowObject.showAt(0, 0, true));
-		Thread.sleep(2000);
+		Thread.sleep(1000);
 	}
 	
 	@Test

@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 
 import org.slf4j.Logger;
@@ -130,7 +131,7 @@ public abstract class AbstractFinLauncherBuilder implements FinLauncherBuilder {
 	
 	Executor getExecutor() {
 		if (this.executor == null) {
-			this.executor = ForkJoinPool.commonPool();
+			this.executor = FinRuntime.getCommonPool();
 		}
 		return this.executor;
 	}

@@ -6,6 +6,11 @@ import static org.junit.Assert.assertNotNull;
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -95,5 +100,26 @@ public class FinRuntimeTest {
 		finally {
 			TestUtils.runSync(fin.System.exit());
 		}
+	}
+	
+	@Test
+	public void multipleConnections() throws Exception {
+		int cnt = 30;
+		String[] versions = {"stable", "stable-v18", "stable-v17", "stable-v16", "stable-v15"};
+		CountDownLatch latch = new CountDownLatch(cnt);
+		for (int i=0; i<cnt; i++) {
+			int index = i;
+			FinLauncher.newLauncherBuilder()
+				.runtimeVersion(versions[index%versions.length])
+				.build().launch().thenComposeAsync(runtime->{
+				return runtime.System.getVersion().thenAccept(v->{
+					logger.debug("runtime: {}, version: {}", runtime.getConnectionUuid(), v);
+					latch.countDown();
+				});
+			});
+		}
+		
+		latch.await(30, TimeUnit.SECONDS);
+		assertEquals(0, latch.getCount());
 	}
 }

@@ -15,17 +15,15 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -48,17 +46,19 @@ public class FinConnectionImpl implements FinRuntimeConnection, Listener {
 	private int port;
 	private WebSocket webSocket;
 	private String connectionUuid;
-	private CompletableFuture<FinConnectionImpl> authFuture;
+	private CompletableFuture<FinConnectionImpl> connectionFuture;
 	private List<FinRuntimeConnectionListener> finConnectionListeners;
 	private boolean connected;
 	private String licenseKey;
 	private String configUrl;
 	private CopyOnWriteArrayList<MessageListener> ofMessageListeners;
-	private ReentrantLock websocketLock;
 	private Boolean nonPersistent;
+	private AtomicBoolean running;
+	private ArrayBlockingQueue<JsonObject> msgOutQueue;
+	private ArrayBlockingQueue<String> msgInQueue;
+	private CompletableFuture<Void> disconnectFuture;
+	private int msgEnqueueTimeout;
 	
-	Executor executor;
-
 	FinApplication _application;
 	FinChannel _channel;
 	FinClipboard _clipboard;
@@ -70,21 +70,76 @@ public class FinConnectionImpl implements FinRuntimeConnection, Listener {
 	FinView _view;
 	FinWindow _window;
 	FinSubscriptionManager _subscriptionManager;
+	
+	Executor executor;
+
 
 	FinConnectionImpl(String connectionUuid, int port, String licenseKey, String configUrl, Executor executor, Boolean nonPersistent) {
 		this.connectionUuid = connectionUuid;
 		this.port = port;
 		this.licenseKey = licenseKey;
 		this.configUrl = configUrl;
+		this.executor = executor;
 		this.receivedMessage = new StringBuilder();
 		this.ackMap = new ConcurrentHashMap<>();
 		this.messageId = new AtomicInteger(0);
-		this.authFuture = new CompletableFuture<>();
+		this.connectionFuture = new CompletableFuture<>();
 		this.nonPersistent = nonPersistent;;
-		this.executor = executor;
 		this.finConnectionListeners = new ArrayList<>();
 		this.ofMessageListeners = new CopyOnWriteArrayList<>();
-		this.websocketLock = new ReentrantLock();
+		String strMsgEnqueueTimeout = System.getProperty("com.mijibox.openfin.msg_enqueue_timeout", "10");
+		this.msgEnqueueTimeout = Integer.parseInt(strMsgEnqueueTimeout);
+	}
+	
+	private void initMessageQueues() {
+		this.running = new AtomicBoolean(true);
+		String msgInQueueSize = System.getProperty("com.mijibox.openfin.msg_in.queue_size", "100");
+		String msgOutQueueSize = System.getProperty("com.mijibox.openfin.msg_out.queue_size", "100");
+		this.msgInQueue = new ArrayBlockingQueue<>(Integer.parseInt(msgInQueueSize));
+		this.msgOutQueue = new ArrayBlockingQueue<>(Integer.parseInt(msgOutQueueSize));
+		//incoming message process loop
+		Thread tIn = new Thread(()->{
+			logger.debug("{}: incoming message loop started", this.connectionUuid);
+			while (running.get() || !this.msgInQueue.isEmpty()) {
+				try {
+					String msg = this.msgInQueue.poll(500, TimeUnit.MILLISECONDS);
+					if (msg != null) {
+						this.processMessage(msg);
+					}
+				}
+				catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				finally {
+				}
+			}
+			logger.debug("{}: incoming message loop ended", this.connectionUuid);
+		}, this.connectionUuid + ":msgIn");
+		tIn.start();
+		//outgoing message process loop
+		Thread tOut = new Thread(()->{
+			logger.debug("{}: outgoing message loop started", this.connectionUuid);
+			while (running.get() || !this.msgOutQueue.isEmpty()) {
+				try {
+					JsonObject msg = this.msgOutQueue.poll(500, TimeUnit.MILLISECONDS);
+					if (msg != null) {
+						String msgString = msg.toString();
+						logger.debug("sending: {}", msgString);
+						this.webSocket.sendText(msgString, true).join();
+					}
+				}
+				catch(Exception e) {
+					logger.error("error procesing outgoing message", e);
+				}
+				finally {
+				}
+			}
+			logger.debug("{}: outgoing message loop ended", this.connectionUuid);
+			this.webSocket.sendClose(WebSocket.NORMAL_CLOSURE, "normal closure").thenAccept(ws->{
+				this.disconnectFuture.complete(null);
+			});
+		}, this.connectionUuid + ":msgOut");
+		tOut.start();
 	}
 
 	private void initApiObjects() {
@@ -114,24 +169,32 @@ public class FinConnectionImpl implements FinRuntimeConnection, Listener {
 
 	CompletionStage<FinConnectionImpl> connect() {
 		try {
+			this.initMessageQueues();
+			
 			String endpointURI = "ws://localhost:" + this.port + "/";
 			logger.debug("connecting to {}", endpointURI);
-			HttpClient httpClient = HttpClient.newBuilder().executor(this.executor).build();
-			httpClient.newWebSocketBuilder().buildAsync(new URI(endpointURI), this);
+			HttpClient httpClient = HttpClient.newBuilder().build();
+			httpClient.newWebSocketBuilder()
+					.buildAsync(new URI(endpointURI), this)
+					.exceptionally(e->{
+						logger.error("error connecting to websocket server", e);
+						this.connectionFuture.completeExceptionally(e);
+						return null;
+					});
 		}
 		catch (URISyntaxException e) {
 			e.printStackTrace();
 		}
 		finally {
 		}
-		return this.authFuture;
+		return this.connectionFuture;
 	}
 
 	@Override
 	public CompletionStage<Void> disconnect() {
-		return this.webSocket.sendClose(WebSocket.NORMAL_CLOSURE, "normal closure").thenAccept(ws->{
-			
-		});
+		this.running.set(false);
+		this.disconnectFuture = new CompletableFuture<Void>();
+		return this.disconnectFuture;
 	}
 
 	private String getPackageVersion() {
@@ -154,10 +217,10 @@ public class FinConnectionImpl implements FinRuntimeConnection, Listener {
 
 	@Override
 	public void onOpen(WebSocket webSocket) {
+		logger.debug("websocket connected");
 		this.connected = true;
 		webSocket.request(1);
 		this.webSocket = webSocket;
-		logger.debug("websocket connected");
 		JsonObject authPayload = Json.createObjectBuilder().add("action", "request-external-authorization")
 				.add("payload", Json.createObjectBuilder().add("uuid", this.connectionUuid).add("type", "file-token")
 						.add("licenseKey", this.licenseKey == null ? JsonValue.NULL : Json.createValue(this.licenseKey))
@@ -172,7 +235,7 @@ public class FinConnectionImpl implements FinRuntimeConnection, Listener {
 										.add("version", getPackageVersion()).build())
 						.build())
 				.build();
-		this.sendWebSocketMessage(authPayload.toString());
+		this.msgOutQueue.add(authPayload);
 	}
 
 	@Override
@@ -180,7 +243,16 @@ public class FinConnectionImpl implements FinRuntimeConnection, Listener {
 		receivedMessage.append(data);
 		webSocket.request(1);
 		if (last) {
-			processMessage(receivedMessage.toString());
+			try {
+				String msg = receivedMessage.toString(); 
+				boolean b = this.msgInQueue.offer(msg, this.msgEnqueueTimeout, TimeUnit.SECONDS);
+				if (!b) {
+					logger.error("incoming message queue full, message dropped: {}", msg);
+				}
+			}
+			catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 			receivedMessage.setLength(0);
 		}
 		return null;
@@ -189,6 +261,7 @@ public class FinConnectionImpl implements FinRuntimeConnection, Listener {
 	@Override
 	public CompletionStage<?> onClose(WebSocket webSocket, int statusCode, String reason) {
 		logger.debug("websocket closed, statusCode: {}, reason: {}", statusCode, reason);
+		this.running.set(false);
 		this.connected = false;
 		for (FinRuntimeConnectionListener l : this.finConnectionListeners) {
 			try {
@@ -204,6 +277,7 @@ public class FinConnectionImpl implements FinRuntimeConnection, Listener {
 	@Override
 	public void onError(WebSocket webSocket, Throwable error) {
 		logger.debug("websocket error", error);
+		this.running.set(false);
 		this.connected = false;
 		for (FinRuntimeConnectionListener l : this.finConnectionListeners) {
 			try {
@@ -216,8 +290,7 @@ public class FinConnectionImpl implements FinRuntimeConnection, Listener {
 	}
 
 	/**
-	 * only invoke when there will be a responding ack, otherwise use
-	 * sendWebSocketMessage
+	 * Send API message to OpenFin runtime.
 	 * 
 	 * @param action
 	 *            action name
@@ -228,8 +301,7 @@ public class FinConnectionImpl implements FinRuntimeConnection, Listener {
 	}
 
 	/**
-	 * only invoke when there will be a responding ack, otherwise use
-	 * sendWebSocketMessage
+	 * Send API message to OpenFin runtime with action payload.
 	 * 
 	 * @param action
 	 *            action name
@@ -238,35 +310,29 @@ public class FinConnectionImpl implements FinRuntimeConnection, Listener {
 	 * @return response Ack from the action
 	 */
 	public CompletionStage<Ack> sendMessage(String action, JsonObject payload) {
-		return CompletableFuture.supplyAsync(() -> {
-			return null;
-		}, this.executor).thenCompose(v -> {
-			if (this.connected) {
+		if (this.connected && this.running.get()) {
+			CompletableFuture<Ack> ackFuture = new CompletableFuture<>();
+			try {
 				int msgId = this.messageId.getAndIncrement();
-				CompletableFuture<Ack> ackFuture = new CompletableFuture<>();
 				this.ackMap.put(msgId, ackFuture);
 				JsonObjectBuilder json = Json.createObjectBuilder();
 				JsonObject msgJson = json.add("action", action).add("messageId", msgId).add("payload", payload).build();
-				String msg = msgJson.toString();
-				this.sendWebSocketMessage(msg);
-				return ackFuture;
+					boolean b = this.msgOutQueue.offer(msgJson, this.msgEnqueueTimeout, TimeUnit.SECONDS);
+					if (b) {
+						return ackFuture;
+					}
+					else {
+						//queue full
+						return CompletableFuture.failedStage(new RuntimeException("error sending message, outging message queue full"));
+					}
 			}
-			else {
-				throw new RuntimeException("not connected");
+			catch (Exception e) {
+				return CompletableFuture.failedStage(new RuntimeException("error sending message", e));
 			}
-		});
-	}
-
-	private void sendWebSocketMessage(String msg) {
-		logger.debug("sending: {}", msg);
-		this.websocketLock.lock();
-		this.webSocket.sendText(msg, true).thenAccept(ws -> {
-			this.websocketLock.unlock();
-		}).exceptionally(e -> {
-			this.websocketLock.unlock();
-			logger.error("error sending message over websocket", e);
-			return null;
-		});
+		}
+		else {
+			return CompletableFuture.failedStage(new RuntimeException("not connected"));
+		}
 	}
 
 	private void processMessage(String message) {
@@ -295,12 +361,11 @@ public class FinConnectionImpl implements FinRuntimeConnection, Listener {
 		else if ("authorization-response".equals(action)) {
 			if (payload.getBoolean("success")) {
 				this.initApiObjects();
-				this.authFuture.complete(this);
+				this.connectionFuture.complete(this);
 			}
 			else {
-				this.authFuture.completeExceptionally(new RuntimeException(payload.getString("reason")));
+				this.connectionFuture.completeExceptionally(new RuntimeException(payload.getString("reason")));
 			}
-
 		}
 		else if ("ack".equals(action)) {
 			int correlationId = receivedJson.getInt("correlationId");
@@ -309,23 +374,18 @@ public class FinConnectionImpl implements FinRuntimeConnection, Listener {
 				logger.error("missing ackFuture, correlationId={}", correlationId);
 			}
 			else {
-				
-				ackFuture.completeAsync(()->{
-					return FinBeanUtils.fromJsonObject(payload, Ack.class);
-				}, this.executor);
+				ackFuture.complete(FinBeanUtils.fromJsonObject(payload, Ack.class));
 			}
 		}
 		else {
-			this.executor.execute(()->{
-				for (MessageListener l : this.ofMessageListeners) {
-					try {
-						l.onMessage(action, payload);
-					}
-					catch (Exception ex) {
-						logger.error("error invoking message listener", ex);
-					}
+			for (MessageListener l : this.ofMessageListeners) {
+				try {
+					l.onMessage(action, payload);
 				}
-			});
+				catch (Exception ex) {
+					logger.error("error invoking message listener", ex);
+				}
+			}
 		}
 	}
 

@@ -3,8 +3,13 @@ package com.mijibox.openfin;
 import java.nio.file.Path;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class FinRuntime {
+	
+	private static ExecutorService commonPool;
+	
 	public final FinApplication Application;
 	public final FinChannel Channel;
 	public final FinClipboard Clipboard;
@@ -38,6 +43,13 @@ public class FinRuntime {
 		this.View = this.finConnection._view;
 		this.Window = this.finConnection._window;
 		this.SubscriptionManager = this.finConnection._subscriptionManager;
+	}
+	
+	public static ExecutorService getCommonPool() {
+		if (commonPool == null) {
+			commonPool = Executors.newCachedThreadPool();
+		}
+		return commonPool;
 	}
 	
 	public String getConnectionUuid() {

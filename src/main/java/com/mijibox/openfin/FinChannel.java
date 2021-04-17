@@ -54,7 +54,7 @@ public class FinChannel extends FinApiObject {
 		
 		//this is very confusing, it's not for channel client connection, it's a channel that's connected to openfin runtime.
 		finConnection._subscriptionManager.addListener("channel", "connected", event ->{
-			logger.debug("channel connected: {}", event);
+			logger.debug("channel connected: {}", event.getEventObject());
 			this.fireChannelConnectedEvent(event);
 			String channelName = event.getEventObject().getString("channelName");
 			this.clientMap.values().forEach(c->{
@@ -74,7 +74,7 @@ public class FinChannel extends FinApiObject {
 		});
 		
 		finConnection._subscriptionManager.addListener("channel", "disconnected", event ->{
-			logger.debug("channel disconnected: {}", event);
+			logger.debug("channel disconnected: {}", event.getEventObject());
 			this.fireChannelDisconnectedEvent(event);
 			String channelName = event.getEventObject().getString("channelName");
 			this.clientMap.values().forEach(c->{

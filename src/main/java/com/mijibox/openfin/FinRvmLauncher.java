@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +27,7 @@ public class FinRvmLauncher extends AbstractFinLauncher {
 		this.builder = builder;
 	}
 
-	public CompletableFuture<String> getRvmLatestVersion() {
+	public CompletionStage<String> getRvmLatestVersion() {
 		return CompletableFuture.supplyAsync(() -> {
 			try {
 				String v = null;
@@ -45,40 +46,37 @@ public class FinRvmLauncher extends AbstractFinLauncher {
 			}
 			finally {
 			}
-		});
+		}, builder.getExecutor());
 	}
 
 	@Override
 	public CompletionStage<Path> getExecutablePath() {
 		Path rvmPath = this.builder.getRvmInstallDirectory().resolve("OpenFinRVM.exe");
-		if (!Files.exists(rvmPath, LinkOption.NOFOLLOW_LINKS)) {
-			return CompletableFuture.supplyAsync(() -> {
+		return CompletableFuture.supplyAsync(()->{
+			if (!Files.exists(rvmPath, LinkOption.NOFOLLOW_LINKS)) {
 				logger.debug("{} not available.", rvmPath);
 				try {
-					this.download();
+					String rvmTarget = "/release/rvm/latest";
+					logger.info("download OpenFinRVM from {}", rvmTarget);
+					Path rvmZip = this.download(rvmTarget);
+					logger.debug("RVM downloaded, path: {}", rvmZip);
+					this.unzip(rvmZip, this.builder.getRvmInstallDirectory());
+					Files.delete(rvmZip);
+					super.executablePath = rvmPath;
 					return rvmPath;
 				}
 				catch (Exception e) {
 					throw new RuntimeException("error downloading OpenFinRVM", e);
 				}
-			});
-		}
-		else {
-			logger.debug("OpenFinRVM executable located: {}", rvmPath);
-			super.executablePath = rvmPath;
-			return CompletableFuture.completedStage(rvmPath);
-		}
+			}
+			else {
+				logger.debug("OpenFinRVM executable located: {}", rvmPath);
+				super.executablePath = rvmPath;
+				return rvmPath;
+			}
+		}, this.builder.getExecutor());		
 	}
 
-	public void download() throws Exception {
-		String rvmTarget = "/release/rvm/latest";
-		logger.info("download OpenFinRVM from {}", rvmTarget);
-		Path rvmZip = this.download(rvmTarget);
-		logger.debug("RVM downloaded, path: {}", rvmZip);
-		this.unzip(rvmZip, this.builder.getRvmInstallDirectory());
-		Files.delete(rvmZip);
-	}
-	
 	@Override
 	public CompletionStage<Process> startProcess() {
 		return this.getExecutablePath().thenApply(rvmPath -> {

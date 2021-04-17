@@ -42,39 +42,34 @@ public class PosixPortDiscoverer {
 		}
 		return tmpDir + "openfin." + pipeName + ".sock";
 	}
-
+	
 	CompletionStage<JsonObject> getPortInfo(String pipeName) {
-		String socketName = getNamedPipeFilePath(pipeName);
 		return CompletableFuture.supplyAsync(() -> {
-			try {
-				logger.debug("findPort: {}", socketName);
-				int socket = cLib.socket(PosixLibrary.AF_UNIX, PosixLibrary.SOCK_STREAM, PosixLibrary.PROTOCOL);
-				SockAddr sockAddr = new SockAddr();
-				sockAddr.setPath(socketName);
-				cLib.bind(socket, sockAddr, sockAddr.size());
-				cLib.listen(socket, 1);
-				SockAddr clientAddr = new SockAddr();
-				IntByReference addrLen = new IntByReference(0);
-				int clientSocket = cLib.accept(socket, clientAddr, addrLen);
-				byte[] buffer = new byte[4096];
-				int handShakeLength = cLib.read(clientSocket, buffer, buffer.length);
-				logger.debug("handShakeLength: {}", handShakeLength);
-				ByteBuffer bb = ByteBuffer.wrap(buffer);
-				bb.putInt(20, cLib.getpid());
-				int length= cLib.write(clientSocket, buffer, handShakeLength);
-				logger.debug("wrote length: {}", length);
-				length = cLib.read(clientSocket, buffer, buffer.length);
-				logger.debug("read length: {}", length);
-				String portInfoJson = new String(buffer, handShakeLength, length-handShakeLength);
-				logger.debug("portInfo: {}", portInfoJson);
-				JsonReader jsonReader = Json.createReader(new StringReader(portInfoJson));
-				cLib.close(socket);
-				cLib.unlink(socketName);
-				return jsonReader.readObject();
-			}
-			catch (Exception e) {
-				throw new RuntimeException("unable to get port number", e);
-			}
+			String socketName = getNamedPipeFilePath(pipeName);
+			logger.debug("findPort: {}", socketName);
+			int socket = cLib.socket(PosixLibrary.AF_UNIX, PosixLibrary.SOCK_STREAM, PosixLibrary.PROTOCOL);
+			SockAddr sockAddr = new SockAddr();
+			sockAddr.setPath(socketName);
+			cLib.bind(socket, sockAddr, sockAddr.size());
+			cLib.listen(socket, 1);
+			SockAddr clientAddr = new SockAddr();
+			IntByReference addrLen = new IntByReference(0);
+			int clientSocket = cLib.accept(socket, clientAddr, addrLen);
+			byte[] buffer = new byte[4096];
+			int handShakeLength = cLib.read(clientSocket, buffer, buffer.length);
+			logger.debug("handShakeLength: {}", handShakeLength);
+			ByteBuffer bb = ByteBuffer.wrap(buffer);
+			bb.putInt(20, cLib.getpid());
+			int length= cLib.write(clientSocket, buffer, handShakeLength);
+			logger.debug("wrote length: {}", length);
+			length = cLib.read(clientSocket, buffer, buffer.length);
+			logger.debug("read length: {}", length);
+			String portInfoJson = new String(buffer, handShakeLength, length-handShakeLength);
+			logger.debug("portInfo: {}", portInfoJson);
+			JsonReader jsonReader = Json.createReader(new StringReader(portInfoJson));
+			cLib.close(socket);
+			cLib.unlink(socketName);
+			return jsonReader.readObject();
 		}, this.executor);
 	}
 
