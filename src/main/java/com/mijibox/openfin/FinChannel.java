@@ -100,7 +100,7 @@ public class FinChannel extends FinApiObject {
 			});
 		});
 	}
-
+	
 	private void processChannelMessage(JsonObject msgPayload) {
 		logger.debug("processChannelMessage: {}", msgPayload);
 		JsonObject senderIdentityJson = msgPayload.getJsonObject("senderIdentity");

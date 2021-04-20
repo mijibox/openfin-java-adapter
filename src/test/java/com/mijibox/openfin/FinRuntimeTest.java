@@ -104,7 +104,7 @@ public class FinRuntimeTest {
 	
 	@Test
 	public void multipleConnections() throws Exception {
-		int cnt = 30;
+		int cnt = 20;
 		String[] versions = {"stable", "stable-v18", "stable-v17", "stable-v16", "stable-v15"};
 		CountDownLatch latch = new CountDownLatch(cnt);
 		for (int i=0; i<cnt; i++) {
