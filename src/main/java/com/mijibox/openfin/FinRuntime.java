@@ -10,15 +10,45 @@ public class FinRuntime {
 	
 	private static ExecutorService commonPool;
 	
+	/**
+	 * API Object for OpenFin Application
+	 */
 	public final FinApplication Application;
+	/**
+	 * API Object for OpenFin Message Channel
+	 */
 	public final FinChannel Channel;
+	/**
+	 * API Object for OpenFin Clipboard
+	 */
 	public final FinClipboard Clipboard;
+	/**
+	 * API Object for OpenFin Global Hotkeys
+	 */
 	public final FinGlobalHotkey GlobalHotkey;
+	/**
+	 * API Object for OpenFin Inter-Application Message Bus
+	 */
 	public final FinInterApplicationBus InterApplicationBus;
+	/**
+	 * API Object for OpenFin Layout
+	 */
 	public final FinLayout Layout;
+	/**
+	 * API Object for OpenFin Platform
+	 */
 	public final FinPlatform Platform;
+	/**
+	 * API Object for OpenFin System
+	 */
 	public final FinSystem System;
+	/**
+	 * API Object for OpenFin View
+	 */
 	public final FinView View;
+	/**
+	 * API Object for OpenFin Window
+	 */
 	public final FinWindow Window;
 	
 	final FinSubscriptionManager SubscriptionManager;
@@ -45,6 +75,10 @@ public class FinRuntime {
 		this.SubscriptionManager = this.finConnection._subscriptionManager;
 	}
 	
+	/**
+	 * Cached Thread Pool
+	 * @return static thread pool instance
+	 */
 	public static ExecutorService getCommonPool() {
 		if (commonPool == null) {
 			commonPool = Executors.newCachedThreadPool();
@@ -52,38 +86,76 @@ public class FinRuntime {
 		return commonPool;
 	}
 	
+	/**
+	 * Get the connection UUID, same as getConnection().getUuid();
+	 * @return The connection UUID.
+	 */
 	public String getConnectionUuid() {
 		return this.finConnection.getUuid();
 	}
 	
+	/**
+	 * Get the connection instance between Java and OpenFin Runtime
+	 * @return The connection object.
+	 */
 	public FinRuntimeConnection getConnection() {
 		return this.finConnection;
 	}
 	
+	/**
+	 * Get the executor that's used for asynchronous calls.
+	 * @return
+	 */
 	public Executor getExecutor() {
 		return this.finConnection.executor;
 	}
 	
+	/**
+	 * Disconnects the current connection between Java and OpenFin Runtime
+	 * @return The new CompletionStage after the request is sent.
+	 */
 	public CompletionStage<Void> disconnect() {
 		return this.finConnection.disconnect();
 	}
 	
+	/**
+	 * Gets the assetUrl setting for this OpenFin runtime instance.
+	 * @return The setting of assetUrl.
+	 */
 	public String getAssetsUrl() {
 		return this.assetsUrl;
 	}
 	
+	/**
+	 * Gets the request OpenFin Runtime version.
+	 * @return The requested OpenFin Runtime version.
+	 */
 	public String getRequestedVersion() {
 		return this.requestedVersion;
 	}
 	
+	/**
+	 * Gets the version number of the OpenFin Runtime instance.
+	 * @return The version of this OpenFin Runtime.
+	 */
 	public String getVersion() {
 		return this.version;
 	}
 	
+	/**
+	 * Adds a OpenFin runtime connection listener
+	 * @param connectionListener The connection listener.
+	 * @return true if the listener is added to the end of the listener list.
+	 */
 	public boolean addConnectionListener(FinRuntimeConnectionListener connectionListener) {
 		return this.finConnection.addConnectionListener(connectionListener);
 	}
 	
+	/**
+	 * Removes specified OpenFin runtime connection listener
+	 * @param connectionListener The connection listener.
+	 * @return true if the listener is removed from the listener list.
+	 */
 	public boolean removeConnectionListener(FinRuntimeConnectionListener connectionListener) {
 		return this.finConnection.removeConnectionListener(connectionListener);
 	}
