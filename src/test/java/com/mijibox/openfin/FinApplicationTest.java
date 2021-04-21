@@ -190,7 +190,7 @@ public class FinApplicationTest {
 	public void getWindow() throws Exception {
 		FinApplicationObject appObj = TestUtils.runSync(fin.Application.startFromManifest("https://cdn.openfin.co/demos/hello/app.json"));
 		Thread.sleep(500);
-		FinWindowObject mainWin = appObj.getWindow();
+		FinWindowObject mainWin = TestUtils.runSync(appObj.getWindow());
 		assertNotNull(mainWin);
 		try {
 			TestUtils.runSync(mainWin.close());
@@ -294,7 +294,7 @@ public class FinApplicationTest {
 
 		TestUtils.runSync(appObj.setTrayIcon("http://cdn.openfin.co/assets/testing/icons/circled-digit-one.png"));
 		
-		Thread.sleep(10000);
+		Thread.sleep(2000);
 		
 		TrayIconInfo trayInfo = TestUtils.runSync(appObj.getTrayIconInfo());
 		assertNotNull(trayInfo);

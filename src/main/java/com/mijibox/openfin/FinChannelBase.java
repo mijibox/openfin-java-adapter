@@ -23,15 +23,24 @@ public class FinChannelBase extends FinApiObject {
 		this.actionMap = new ConcurrentHashMap<>();
 	}
 
+	/**
+	 * Register an action to be called.
+	 * @param action Name of the action.
+	 * @param listener The action listener. 
+	 */
 	public void register(String action, FinChannelAction listener) {
 		this.actionMap.put(action, listener);
 	}
 	
+	/**
+	 * Remove an action by action name.
+	 * @param action The action name.
+	 */
 	public void remove(String action) {
 		this.actionMap.remove(action);
 	}
 	
-	public JsonValue processAction(String action, JsonValue payload, Identity senderIdentity) {
+	JsonValue processAction(String action, JsonValue payload, Identity senderIdentity) {
 		try {
 			payload = this.beforeAction == null ? payload : this.beforeAction.invoke(action, payload, senderIdentity);
 			if (this.actionMap.containsKey(action)) {
@@ -61,6 +70,10 @@ public class FinChannelBase extends FinApiObject {
 		return defaultAction;
 	}
 
+	/**
+	 * Sets a default action. This is used any time an action that has not been registered is invoked. Default behavior if not set is to throw an error.
+	 * @param defaultAction Action to be executed when specified action name that has not been registered.
+	 */
 	public void setDefaultAction(FinChannelMiddleware defaultAction) {
 		this.defaultAction = defaultAction;
 	}
@@ -69,6 +82,10 @@ public class FinChannelBase extends FinApiObject {
 		return onError;
 	}
 
+	/**
+	 * Register an error handler. This is called before responding on any error.
+	 * @param onError Action to be executed in case of an error.
+	 */
 	public void setOnError(FinChannelMiddleware onError) {
 		this.onError = onError;
 	}
@@ -77,6 +94,10 @@ public class FinChannelBase extends FinApiObject {
 		return beforeAction;
 	}
 
+	/**
+	 * Registers the middleware that fires before the action.
+	 * @param beforeAction Action to be executed before invoking the action.
+	 */
 	public void setBeforeAction(FinChannelMiddleware beforeAction) {
 		this.beforeAction = beforeAction;
 	}
@@ -85,6 +106,10 @@ public class FinChannelBase extends FinApiObject {
 		return afterAction;
 	}
 
+	/**
+	 * Registers the middleware that fires after the action.
+	 * @param beforeAction Action to be executed after invoking the action.
+	 */
 	public void setAfterAction(FinChannelMiddleware afterAction) {
 		this.afterAction = afterAction;
 	}

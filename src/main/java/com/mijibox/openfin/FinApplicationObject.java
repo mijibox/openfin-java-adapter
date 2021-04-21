@@ -222,11 +222,11 @@ public class FinApplicationObject extends FinInstanceObject {
 	 * Returns an instance of the main Window of the application
 	 * @return
 	 */
-	public FinWindowObject getWindow() {
+	public CompletionStage<FinWindowObject> getWindow() {
 		if (this.window == null) {
 			this.window = new FinWindowObject(this.finConnection, new Identity(this.identity.getUuid(), this.identity.getUuid()));
 		}
-		return this.window;
+		return CompletableFuture.completedStage(this.window);
 	}
 	
 	/**

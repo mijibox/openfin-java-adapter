@@ -187,6 +187,11 @@ public class FinChannel extends FinApiObject {
 		}
 	}
 
+	/**
+	 * Creates a new channel.
+	 * @param channelName Name of the new channel.
+	 * @return new CompletionStage of the new ChannelProvider instance of the channel.
+	 */
 	public CompletionStage<FinChannelProvider> create(String channelName) {
 		JsonObject payload = Json.createObjectBuilder().add("channelName", channelName).build();
 		return this.finConnection.sendMessage("create-channel", payload).thenApply(ack -> {
@@ -211,10 +216,21 @@ public class FinChannel extends FinApiObject {
 		});
 	}
 
+	/**
+	 * Connects to a channel.
+	 * @param channelName Name of the channel to connect to.
+	 * @return new CompletionStage of the new ChannelClient instance of the channel.
+	 */
 	public CompletionStage<FinChannelClient> connect(String channelName) {
 		return this.connect(channelName, null);
 	}
 	
+	/**
+	 * Connects to a channel.
+	 * @param channelName Name of the channel to connect to.
+	 * @param opts Channel connection options.
+	 * @return new CompletionStage of the new ChannelClient instance of the channel.
+	 */
 	public CompletionStage<FinChannelClient> connect(String channelName, ChannelConnectionOptions opts) {
 		CompletableFuture<FinChannelClient> channelClientFuture = new CompletableFuture<>();
 		

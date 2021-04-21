@@ -26,7 +26,7 @@ public class TestUtils {
 	}
 
 	public static FinRuntime getOpenFinRuntime() {
-		return getOpenFinRuntime("stable");
+		return getOpenFinRuntime("stable-v15");
 	}
 
 	public static FinRuntime getOpenFinRuntime(String version) {

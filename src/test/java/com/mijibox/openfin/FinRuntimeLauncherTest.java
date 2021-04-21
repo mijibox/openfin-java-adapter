@@ -246,7 +246,9 @@ public class FinRuntimeLauncherTest {
 	public void localManifest() throws Exception {
 		FinRuntime fin = TestUtils.runSync(FinLauncher.newLauncherBuilder().build().launch());
 		FinApplicationObject app = TestUtils.runSync(fin.Application.startFromManifest(TestUtils.getTestManifestUrl("google")));
-		TestUtils.runSync(app.getWindow().close());
+		TestUtils.runSync(app.getWindow().thenAccept(winObj->{
+			winObj.close();
+		}));
 		TestUtils.runSync(fin.System.exit());
 		Thread.sleep(2000);
 	}

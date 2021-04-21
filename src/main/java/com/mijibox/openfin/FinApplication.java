@@ -19,8 +19,8 @@ public class FinApplication extends FinApiObject {
 
 	/**
 	 * Creates and starts a new Application.
-	 * @param appOpts
-	 * @return
+	 * @param appOpts Options used to create the application.
+	 * @return new CompletionStage for the new application instance.
 	 */
 	public CompletionStage<FinApplicationObject> start(ApplicationOptions appOpts) {
 		return this.create(appOpts).thenCompose(appObj -> {
@@ -78,8 +78,8 @@ public class FinApplication extends FinApiObject {
 
 	/**
 	 * Retrieves application's manifest and returns a running instance of the application.
-	 * @param manifestUrl
-	 * @return
+	 * @param manifestUrl The URL of the application's manifest.
+	 * @return new CompletionStage for the new application instance.
 	 */
 	public CompletionStage<FinApplicationObject> startFromManifest(String manifestUrl) {
 		return this.createFromManifest(manifestUrl).thenCompose(appObj->{
@@ -90,7 +90,7 @@ public class FinApplication extends FinApiObject {
 	/**
 	 * Asynchronously returns an Application object that represents an existing application.
 	 * @param identity
-	 * @return
+	 * @return new CompletionStage for the application instance.
 	 */
 	public CompletionStage<FinApplicationObject> wrap(Identity identity) {
 		FinApplicationObject appObj = new FinApplicationObject(this.finConnection, identity);
