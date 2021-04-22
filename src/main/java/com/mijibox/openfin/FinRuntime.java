@@ -159,4 +159,12 @@ public class FinRuntime {
 	public boolean removeConnectionListener(FinRuntimeConnectionListener connectionListener) {
 		return this.finConnection.removeConnectionListener(connectionListener);
 	}
+
+	/**
+	 * Check if it's currently connected to an OpenFin Runtime instance. Same as this.getConnection().isConnected()
+	 * @return true if currently connected to an OpenFin Runtime instance.
+	 */
+	public boolean isConnected() {
+		return this.finConnection.isConnected();
+	}
 }

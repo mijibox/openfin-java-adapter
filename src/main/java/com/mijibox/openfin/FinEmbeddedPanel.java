@@ -2,7 +2,6 @@ package com.mijibox.openfin;
 
 import java.awt.BorderLayout;
 import java.awt.Canvas;
-import java.awt.Container;
 import java.awt.Panel;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -11,7 +10,6 @@ import java.util.concurrent.CompletionStage;
 
 import javax.json.Json;
 import javax.json.JsonObject;
-import javax.swing.SwingUtilities;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,8 +50,7 @@ public class FinEmbeddedPanel extends Panel {
 			@Override
 			public void componentResized(ComponentEvent e) {
 				if (winObj != null) {
-//					setEmbeddedWindowBounds(0, 0, getWidth(), getHeight());
-					User32.INSTANCE.MoveWindow(openFinHwnd, 0, 0,  getWidth(), getHeight(), true);
+					setEmbeddedWindowBounds(0, 0, getWidth(), getHeight());
 				}
 			}
 		});
@@ -67,6 +64,12 @@ public class FinEmbeddedPanel extends Panel {
 		return this.winObj.setBounds(new Bounds(x, y, width, height));
 	}
 
+	/**
+	 * Embeds an OpenFin window into this Panel using Window Identity.
+	 * @param fin OpenFin Runtime instance.
+	 * @param targetIdentity The identity of the OpenFin Window to be embedded.
+	 * @return A new CompletionStage for embedding call.
+	 */
 	public CompletionStage<Void> embed(FinRuntime fin, Identity targetIdentity) {
 		this.fin = fin;
 		if (Platform.isWindows()) {
@@ -124,11 +127,4 @@ public class FinEmbeddedPanel extends Panel {
 			return CompletableFuture.failedStage(new RuntimeException("Not implemented on this platform"));
 		}
 	}
-
-	public void showEmbeddedWindowVisible(boolean visible) {
-		SwingUtilities.invokeLater(() -> {
-			this.canvas.setVisible(visible);
-		});
-	}
-
 }
