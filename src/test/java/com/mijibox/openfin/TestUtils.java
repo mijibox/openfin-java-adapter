@@ -19,14 +19,16 @@ public class TestUtils {
 
 	private static ConcurrentHashMap<String, FinRuntime> runtimeMap;
 	private static int runSyncTimeout;
+	private static String runtimeVersion;
 
 	static {
+		runtimeVersion = System.getProperty("openfin.runtime.version", "stable");
 		String strTimeout = System.getProperty("openfin.runsync.timeout", "20");
 		runSyncTimeout = Integer.parseInt(strTimeout);
 	}
 
 	public static FinRuntime getOpenFinRuntime() {
-		return getOpenFinRuntime("stable-v8");
+		return getOpenFinRuntime(runtimeVersion);
 	}
 
 	public static FinRuntime getOpenFinRuntime(String version) {

@@ -24,12 +24,11 @@ import com.mijibox.openfin.bean.RuntimeConfig;
 public class FinSubscriptionManagerTest {
 	private final static Logger logger = LoggerFactory.getLogger(FinSubscriptionManagerTest.class);
 
-	private static String version = "stable-v16";
 	private static FinRuntime fin;
 
 	@BeforeClass
 	public static void setupBeforeClass() throws Exception {
-		fin = TestUtils.getOpenFinRuntime(version);
+		fin = TestUtils.getOpenFinRuntime();
 	}
 
 	@AfterClass

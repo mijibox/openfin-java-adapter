@@ -44,7 +44,7 @@ public class FinChannelTest {
 
 	@BeforeClass
 	public static void setupBeforeClass() throws Exception {
-		fin = TestUtils.getOpenFinRuntime("18.87.55.19");
+		fin = TestUtils.getOpenFinRuntime("stable-v15");
 	}
 
 	@AfterClass

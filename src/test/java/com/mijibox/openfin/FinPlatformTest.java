@@ -42,12 +42,11 @@ import com.mijibox.openfin.bean.WindowOptions;
 
 public class FinPlatformTest {
 	private final static Logger logger = LoggerFactory.getLogger(FinPlatformTest.class);
-	private static String version = "stable-v17";
 	private static FinRuntime fin;
 
 	@BeforeClass
 	public static void setupBeforeClass() throws Exception {
-		fin = TestUtils.getOpenFinRuntime(version);
+		fin = TestUtils.getOpenFinRuntime("stable-v17");
 	}
 
 	@AfterClass

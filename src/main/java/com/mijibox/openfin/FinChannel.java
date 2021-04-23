@@ -85,7 +85,7 @@ public class FinChannel extends FinApiObject {
 		});
 
 		finConnection._subscriptionManager.addListener("channel", "client-disconnected", event ->{
-			logger.debug("channel client disconnected: {}", event);
+			logger.debug("channel client disconnected: {}", event.getEventObject());
 			RoutingInfo routingInfo = FinBeanUtils.fromJsonObject(event.getEventObject(), RoutingInfo.class);
 			FinChannelClient channelClient = this.clientMap.get(routingInfo.getEndpointId());
 			if (channelClient != null) {

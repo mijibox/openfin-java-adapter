@@ -43,7 +43,6 @@ import com.mijibox.openfin.bean.WindowUpdatableOptions;
 public class FinWindowTest {
 	private final static Logger logger = LoggerFactory.getLogger(FinWindowTest.class);
 
-	private static String version = "stable-v18";
 	private static FinRuntime fin;
 	private static FinApplicationObject ofApplicationObject;
 
@@ -51,7 +50,7 @@ public class FinWindowTest {
 
 	@BeforeClass
 	public static void setupBeforeClass() throws Exception {
-		fin = TestUtils.getOpenFinRuntime(version);
+		fin = TestUtils.getOpenFinRuntime();
 		ApplicationOptions appOpts = new ApplicationOptions(UUID.randomUUID().toString());
 		ofApplicationObject = TestUtils.runSync(fin.Application.start(appOpts));
 	}

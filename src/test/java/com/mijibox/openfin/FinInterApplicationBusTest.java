@@ -22,12 +22,11 @@ import com.mijibox.openfin.bean.RuntimeConfig;
 
 public class FinInterApplicationBusTest {
 	private final static Logger logger = LoggerFactory.getLogger(FinInterApplicationBusTest.class);
-	private static String version = "stable-v17";
 	private static FinRuntime fin;
 
 	@BeforeClass
 	public static void setupBeforeClass() throws Exception {
-		fin = TestUtils.getOpenFinRuntime(version);
+		fin = TestUtils.getOpenFinRuntime();
 	}
 
 	@AfterClass

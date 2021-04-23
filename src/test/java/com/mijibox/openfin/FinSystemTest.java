@@ -45,12 +45,11 @@ import com.sun.jna.Platform;
 public class FinSystemTest {
 	private final static Logger logger = LoggerFactory.getLogger(FinSystemTest.class);
 	
-	private static String version = "19.89.57.15";
 	private static FinRuntime fin;
 
 	@BeforeClass
 	public static void setupBeforeClass() throws Exception {
-		fin = TestUtils.getOpenFinRuntime(version);
+		fin = TestUtils.getOpenFinRuntime();
 	}
 
 	@AfterClass
@@ -63,7 +62,6 @@ public class FinSystemTest {
 		String v = fin.System.getVersion().toCompletableFuture().get(60, TimeUnit.SECONDS);
 		logger.info("verson: {}", v);
 		assertNotNull(v);
-		assertEquals(version, v);
 	}
 
 	@Test
