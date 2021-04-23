@@ -25,7 +25,6 @@ public class ApplicationOptions extends WindowOptions {
 	public ApplicationOptions(String uuid, String name) {
 		super(name == null ? uuid : name);
 		this.uuid = uuid;
-		this.name = name;
 	}
 
 	public String getUuid() {
