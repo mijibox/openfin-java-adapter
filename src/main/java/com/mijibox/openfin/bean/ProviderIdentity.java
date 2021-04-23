@@ -7,8 +7,7 @@ import javax.json.bind.annotation.JsonbProperty;
 public class ProviderIdentity extends Identity {
 	protected String channelId;
 	protected String channelName;
-	@JsonbProperty("isExternal")
-	protected Boolean external;
+	protected Boolean isExternal;
 
 	public String getChannelId() {
 		return channelId;
@@ -26,21 +25,17 @@ public class ProviderIdentity extends Identity {
 		this.channelName = channelName;
 	}
 
-	public boolean isExternal() {
-		return this.getExternal() == null ? false : this.getExternal().booleanValue();
+	public Boolean getIsExternal() {
+		return isExternal;
 	}
 
-	public Boolean getExternal() {
-		return external;
+	public void setIsExternal(Boolean isExternal) {
+		this.isExternal = isExternal;
 	}
 
-	public void setExternal(Boolean external) {
-		this.external = external;
-	}
-	
 	@Override
 	public int hashCode() {
-		return Objects.hash(name, uuid, channelId, channelName, external);
+		return Objects.hash(name, uuid, channelId, channelName, isExternal);
 	}
 
 	@Override
@@ -54,7 +49,7 @@ public class ProviderIdentity extends Identity {
 				&& Objects.equals(this.uuid, other.uuid)
 				&& Objects.equals(this.channelId, other.channelId)
 				&& Objects.equals(this.channelName, other.channelName)
-				&& Objects.equals(this.external, other.external);
+				&& Objects.equals(this.isExternal, other.isExternal);
 	}
 
 

@@ -35,14 +35,30 @@ public class FinChannelClient extends FinChannelBase {
 		this.providerIdentity = FinBeanUtils.fromJsonString(FinBeanUtils.toJsonString(routingInfo), ProviderIdentity.class);
 	}
 
-	public RoutingInfo getRoutingInfo() {
+	RoutingInfo getRoutingInfo() {
 		return routingInfo;
 	}
 	
+	/**
+	 * Gets the identity of this ChannelClient instance.
+	 * @return The identity of the channel client.
+	 */
 	public ClientIdentity getClientIdentity() {
 		return this.clientIdentity;
 	}
 	
+	/**
+	 * Gets the identity of the ChannelProvider which this ChannelClient instance connected to.
+	 * @return The identity of the channel provider.
+	 */
+	public ProviderIdentity getProviderIdentity() {
+		return this.providerIdentity;
+	}
+	
+	/**
+	 * Disconnects from the channel.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> disconnect() {
 		return this.finConnection.sendMessage("disconnect-from-channel", FinBeanUtils.toJsonObject(this.routingInfo)).thenAccept(ack->{
 			if (!ack.isSuccess()) {
@@ -51,10 +67,21 @@ public class FinChannelClient extends FinChannelBase {
 		});
 	}
 
+	/**
+	 * Dispatches the given action to the channel provider.
+	 * @param action The action name.
+	 * @return A new CompletionStage of the action result returned from the provider.
+	 */
 	public CompletionStage<JsonValue> dispatch(String action) {
 		return this.dispatch(action, null);
 	}
 	
+	/**
+	 * Dispatches the given action with payload to the channel provider.
+	 * @param action The action name.
+	 * @param payload The action payload.
+	 * @return A new CompletionStage of the action result returned from the provider.
+	 */
 	public CompletionStage<JsonValue> dispatch(String action, JsonValue payload) {
 		JsonObjectBuilder builder = Json.createObjectBuilder(FinBeanUtils.toJsonObject(this.providerIdentity))
 				.add("providerIdentity", FinBeanUtils.toJsonObject(providerIdentity))
@@ -72,10 +99,20 @@ public class FinChannelClient extends FinChannelBase {
 		});
 	}
 	
+	/**
+	 * Registers a listener that is called on channel disconnection. It is passed the disconnection event of the disconnecting channel.
+	 * @param listener The listener to be added.
+	 * @return true if the listener is added to the end of the listener list.
+	 */
 	public boolean addChannelDisconnectListener(FinEventListener listener) {
 		return this.channelDisconnectListeners.add(listener);
 	}
 	
+	/**
+	 * Removes specified channel disconnection listener from the listener list.
+	 * @param listener The listener to be removed.
+	 * @return true if the listener is removed from the listener list.
+	 */
 	public boolean removeChannelDisconnectListener(FinEventListener listener) {
 		return this.channelDisconnectListeners.remove(listener);
 	}

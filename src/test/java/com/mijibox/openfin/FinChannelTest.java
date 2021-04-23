@@ -103,12 +103,14 @@ public class FinChannelTest {
 	public void connect() throws Exception {
 		String channelName = UUID.randomUUID().toString();
 		FinChannelProvider provider = TestUtils.runSync(fin.Channel.create(channelName));
-		logger.info("providerIdentity: {}", FinBeanUtils.toJsonString(provider.getProviderIdentity()));
+		logger.info("provider.providerIdentity: {}", FinBeanUtils.toJsonString(provider.getProviderIdentity()));
 		assertNotNull(provider.getProviderIdentity());
 		Thread.sleep(500);
 		FinChannelClient client = TestUtils.runSync(fin.Channel.connect(channelName));
 		logger.info("routingInfo: {}", FinBeanUtils.toJsonString(client.getRoutingInfo()));
+		logger.info("client.providerIdentity: {}", FinBeanUtils.toJsonString(client.getProviderIdentity()));
 		assertNotNull(client.getRoutingInfo());
+		assertEquals(provider.getProviderIdentity(), client.getProviderIdentity());
 		TestUtils.runSync(client.disconnect());
 		Thread.sleep(500);
 	}

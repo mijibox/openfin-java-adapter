@@ -15,7 +15,7 @@ public class RoutingInfo extends ProviderIdentity {
 	
 	@Override
 	public int hashCode() {
-		return Objects.hash(name, uuid, channelId, channelName, external, endpointId);
+		return Objects.hash(name, uuid, channelId, channelName, isExternal, endpointId);
 	}
 
 	@Override
@@ -30,7 +30,7 @@ public class RoutingInfo extends ProviderIdentity {
 				&& Objects.equals(this.channelId, other.channelId)
 				&& Objects.equals(this.channelName, other.channelName)
 				&& Objects.equals(this.endpointId, other.endpointId)
-				&& Objects.equals(this.external, other.external);
+				&& Objects.equals(this.isExternal, other.isExternal);
 	}
 
 }
