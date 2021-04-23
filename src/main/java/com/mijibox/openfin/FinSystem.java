@@ -77,7 +77,7 @@ public class FinSystem extends FinApiObject {
 	 * Clears cached data containing application resource files (images, HTML, JavaScript files), cookies, and items stored in the Local Storage.
 	 * 
 	 * @param opts
-	 * @return
+	 * @return A new CompletionStage for the task.
 	 */
 	public CompletionStage<Void> clearCache(ClearCacheOption opts) {
 		return this.finConnection.sendMessage("clear-cache", opts == null ? JsonValue.EMPTY_JSON_OBJECT : FinBeanUtils.toJsonObject(opts)).thenAccept(ack ->{
@@ -90,7 +90,7 @@ public class FinSystem extends FinApiObject {
 	/**
 	 * Clears all cached data when OpenFin Runtime exits.
 	 * 
-	 * @return
+	 * @return A new CompletionStage for the task.
 	 */
 	public CompletionStage<Void> deleteCacheOnExit() {
 		return this.finConnection.sendMessage("delete-cache-request").thenAccept(ack ->{
@@ -103,7 +103,7 @@ public class FinSystem extends FinApiObject {
 	/**
 	 * Exits the Runtime.
 	 * 
-	 * @return
+	 * @return A new CompletionStage for the task.
 	 */
 	public CompletionStage<Void> exit() {
 		return this.finConnection.sendMessage("exit-desktop").thenAccept(ack ->{
@@ -116,7 +116,7 @@ public class FinSystem extends FinApiObject {
 	/**
 	 * Writes any unwritten cookies data to disk.
 	 * 
-	 * @return
+	 * @return A new CompletionStage for the task.
 	 */
 	public CompletionStage<Void> flushCookieStore() {
 		return this.finConnection.sendMessage("flush-cookie-store").thenAccept(ack ->{
@@ -231,7 +231,7 @@ public class FinSystem extends FinApiObject {
 	/**
 	 * Opens the passed URL in the default web browser. It only supports http(s) and fin(s) protocols by default. File protocol and file path are not supported.
 	 * @param url
-	 * @return
+	 * @return A new CompletionStage for the task.
 	 */
 	public CompletionStage<Void> openUrlWithBrowser(String url) {
 		return this.finConnection.sendMessage("open-url-with-browser", Json.createObjectBuilder().add("url", url).build()).thenAccept(ack ->{
@@ -309,7 +309,7 @@ public class FinSystem extends FinApiObject {
 	/**
 	 * Shows the Chromium Developer Tools for the specified window
 	 * @param identity
-	 * @return
+	 * @return A new CompletionStage for the task.
 	 */
 	public CompletionStage<Void> showDeveloperTools(Identity identity) {
 		return this.finConnection.sendMessage("show-developer-tools", FinBeanUtils.toJsonObject(identity)).thenAccept(ack->{
@@ -323,7 +323,7 @@ public class FinSystem extends FinApiObject {
 	 * Runs an executable or batch file. 
 	 * @param path
 	 * @param arguments
-	 * @return
+	 * @return A new CompletionStage for the task.
 	 */
 	public CompletionStage<Void> launchExternalProcess(String path, String arguments) {
 		JsonObjectBuilder builder = Json.createObjectBuilder().add("path", path);

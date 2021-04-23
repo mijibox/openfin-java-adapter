@@ -25,12 +25,10 @@ public class FinChannelClient extends FinChannelBase {
 	private RoutingInfo routingInfo;
 	private ClientIdentity clientIdentity;
 	private ProviderIdentity providerIdentity;
-	private List<FinEventListener> channelConnectListeners;
 	private List<FinEventListener> channelDisconnectListeners;
 
 	FinChannelClient(FinConnectionImpl finConnection, RoutingInfo routingInfo) {
 		super(finConnection);
-		this.channelConnectListeners = new CopyOnWriteArrayList<>();
 		this.channelDisconnectListeners = new CopyOnWriteArrayList<>();
 		this.routingInfo = routingInfo;
 		this.clientIdentity = FinBeanUtils.fromJsonString(FinBeanUtils.toJsonString(routingInfo), ClientIdentity.class);
@@ -74,33 +72,14 @@ public class FinChannelClient extends FinChannelBase {
 		});
 	}
 	
-	public boolean addChannelConnectListener(FinEventListener listener) {
-		return this.channelConnectListeners.add(listener);
-	}
-	
 	public boolean addChannelDisconnectListener(FinEventListener listener) {
 		return this.channelDisconnectListeners.add(listener);
-	}
-	
-	public boolean removeChannelConnectListener(FinEventListener listener) {
-		return this.channelConnectListeners.remove(listener);
 	}
 	
 	public boolean removeChannelDisconnectListener(FinEventListener listener) {
 		return this.channelDisconnectListeners.remove(listener);
 	}
 	
-	void fireChannelConnectedEvent(FinEvent event) {
-		this.channelConnectListeners.forEach(l->{
-			try {
-				l.onEvent(event);
-			}
-			catch (Exception ex) {
-				logger.error("error invoking channel connect listener", ex);
-			}
-		});
-	}
-
 	void fireChannelDisconnectedEvent(FinEvent event) {
 		this.channelDisconnectListeners.forEach(l->{
 			try {

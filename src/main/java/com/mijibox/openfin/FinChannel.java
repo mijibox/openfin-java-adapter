@@ -57,11 +57,6 @@ public class FinChannel extends FinApiObject {
 			logger.debug("channel connected: {}", event.getEventObject());
 			this.fireChannelConnectedEvent(event);
 			String channelName = event.getEventObject().getString("channelName");
-			this.clientMap.values().forEach(c->{
-				if (channelName.equals(c.getRoutingInfo().getChannelName())) {
-					c.fireChannelConnectedEvent(event);
-				}
-			});
 			//check if pending connections
 			this.pendingConnectionsMap.computeIfPresent(channelName, (key, value) ->{
 				ArrayList<CompletableFuture<Void>> pendingConnectionFutures = new ArrayList<>(value);
@@ -202,11 +197,12 @@ public class FinChannel extends FinApiObject {
 					@Override
 					public CompletionStage<Void> destroy() {
 						return super.destroy().thenAccept(v->{
-							logger.debug("provider {} destroyed, removing it from provider map", providerIdentity.getChannelName());
+							logger.debug("provider {} destroyed, removing it from provider map using channelId: {}", providerIdentity.getChannelName(), providerIdentity.getChannelId());
 							providerMap.remove(providerIdentity.getChannelId());
 						});
 					}
 				};
+				logger.debug("provider {} created, adding it to provider map using channelId: {}", providerIdentity.getChannelName(), providerIdentity.getChannelId());
 				this.providerMap.put(providerIdentity.getChannelId(), provider);
 				return provider;
 			}

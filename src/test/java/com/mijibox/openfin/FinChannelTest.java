@@ -422,29 +422,6 @@ public class FinChannelTest {
 	}
 
 	@Test
-	public void channelClientProviderRecreateConnectionListener() throws Exception {
-		String channelName = UUID.randomUUID().toString();
-		
-		FinChannelProvider provider = TestUtils.runSync(fin.Channel.create(channelName));
-		
-		CompletableFuture<FinEvent> connectedFuture = new CompletableFuture<>();
-		
-		TestUtils.runSync(fin.Channel.connect(channelName).thenAccept(channelClient -> {
-			channelClient.addChannelConnectListener(e -> {
-				logger.debug("channel client connected: {}", e);
-				connectedFuture.complete(e);
-			});
-		}));
-		
-		TestUtils.runSync(provider.destroy());
-		
-		//create it again.
-		provider = TestUtils.runSync(fin.Channel.create(channelName));
-		
-		TestUtils.runSync(connectedFuture);
-	}
-
-	@Test
 	public void channelProviderConnectedDisconnectedListeners() throws Exception {
 		String channelName = UUID.randomUUID().toString();
 		
