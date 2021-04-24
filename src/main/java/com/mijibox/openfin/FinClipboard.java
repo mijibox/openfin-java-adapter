@@ -23,10 +23,18 @@ public class FinClipboard extends FinApiObject {
 		super(finConnection);
 	}
 
+	/**
+	 * Reads available formats.
+	 * @return A new CompletionStage for all available formats.
+	 */
 	public CompletionStage<String[]> getAvailableFormats() {
 		return this.getAvailableFormats(null);
 	}
 
+	/**
+	 * Reads available formats for the clipboard type.
+	 * @return A new CompletionStage for all available formats for the clipboard type.
+	 */
 	public CompletionStage<String[]> getAvailableFormats(String type) {
 		JsonObjectBuilder builder = Json.createObjectBuilder();
 		if (type != null) {
@@ -47,10 +55,18 @@ public class FinClipboard extends FinApiObject {
 		});
 	}
 
+	/**
+	 * Reads the content in the clipboard as Html
+	 * @return A new CompletionStage for the html content in the clipboard.
+	 */
 	public CompletionStage<String> readHtml() {
 		return this.readHtml(null);
 	}
 	
+	/**
+	 * Reads the html content in the clipboard of specified type.
+	 * @return A new CompletionStage for the html content in the clipboard.
+	 */
 	public CompletionStage<String> readHtml(String type) {
 		JsonObjectBuilder builder = Json.createObjectBuilder();
 		if (type != null) {
@@ -66,10 +82,18 @@ public class FinClipboard extends FinApiObject {
 		});
 	}
 
+	/**
+	 * Writes the html content to the clipboard. 
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> writeHtml(String html) {
 		return this.writeHtml(null, html);
 	}
 	
+	/**
+	 * Writes the html content to the clipboard of specified type.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> writeHtml(String type, String html) {
 		JsonObjectBuilder builder = Json.createObjectBuilder();
 		builder.add("data", html);
@@ -83,10 +107,18 @@ public class FinClipboard extends FinApiObject {
 		});
 	}
 
+	/**
+	 * Reads the text content in the clipboard.
+	 * @return A new CompletionStage for the text content in the clipboard.
+	 */
 	public CompletionStage<String> readText() {
 		return this.readText(null);
 	}
 	
+	/**
+	 * Reads the text content in the clipboard of specified type.
+	 * @return A new CompletionStage for the text content in the clipboard.
+	 */
 	public CompletionStage<String> readText(String type) {
 		JsonObjectBuilder builder = Json.createObjectBuilder();
 		if (type != null) {
@@ -102,10 +134,18 @@ public class FinClipboard extends FinApiObject {
 		});
 	}
 
+	/**
+	 * Writes the text content to the clipboard. 
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> writeText(String text) {
 		return this.writeText(null, text);
 	}
 	
+	/**
+	 * Writes the text content to the clipboard of specified type. 
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> writeText(String type, String text) {
 		JsonObjectBuilder builder = Json.createObjectBuilder();
 		builder.add("data", text);
@@ -119,10 +159,18 @@ public class FinClipboard extends FinApiObject {
 		});
 	}
 
+	/**
+	 * Reads the RTF content in the clipboard.
+	 * @return A new CompletionStage for the RTF content in the clipboard.
+	 */
 	public CompletionStage<String> readRtf() {
 		return this.readRtf(null);
 	}
 	
+	/**
+	 * Reads the RTF content in the clipboard of specified type.
+	 * @return A new CompletionStage for the RTF content in the clipboard.
+	 */
 	public CompletionStage<String> readRtf(String type) {
 		JsonObjectBuilder builder = Json.createObjectBuilder();
 		if (type != null) {
@@ -138,10 +186,18 @@ public class FinClipboard extends FinApiObject {
 		});
 	}
 
+	/**
+	 * Writes the RTF content to the clipboard. 
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> writeRtf(String rtf) {
 		return this.writeRtf(null, rtf);
 	}
 	
+	/**
+	 * Writes the RTF content to the clipboard of specified type. 
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> writeRtf(String type, String rtf) {
 		JsonObjectBuilder builder = Json.createObjectBuilder();
 		builder.add("data", rtf);
@@ -155,6 +211,10 @@ public class FinClipboard extends FinApiObject {
 		});
 	}
 
+	/**
+	 * Writes text, html and RTF content to the clipboard of specified type. 
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> write(String type, String text, String html, String rtf) {
 		JsonObjectBuilder payloadBuilder = Json.createObjectBuilder();
 		JsonObjectBuilder dataBuilder = Json.createObjectBuilder();

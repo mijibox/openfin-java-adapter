@@ -113,7 +113,7 @@ public class FinChannel extends FinApiObject {
 				String endpointId = intendedTargetIdentity.getString("endpointId");
 				logger.debug("process message for channel client, endpointId: {}, actioin: {}", endpointId, action);
 				FinChannelClient channelClient = this.clientMap.get(endpointId);
-				if (channelClient != null && channelClient.hasActionListener(action)) {
+				if (channelClient != null && channelClient.hasAction(action)) {
 					JsonValue result = channelClient.processAction(action, payload, senderIdentity);
 					JsonPatch resultPatch = Json.createPatchBuilder().add("/payload/result", result == null ? JsonValue.NULL : result).build();
 					ackToSenderPayload = resultPatch.apply(ackToSenderPayload);
@@ -130,7 +130,7 @@ public class FinChannel extends FinApiObject {
 				String channelId = intendedTargetIdentity.getString("channelId");
 				logger.debug("process message for channel provider, channelId: {}", channelId);
 				FinChannelProvider channelProvider = this.providerMap.get(channelId);
-				if (channelProvider.hasActionListener(action)) {
+				if (channelProvider.hasAction(action)) {
 					JsonValue result = channelProvider.processAction(action, payload, senderIdentity);
 					JsonPatch resultPatch = Json.createPatchBuilder().add("/payload/result", result == null ? JsonValue.NULL : result).build();
 					ackToSenderPayload = resultPatch.apply(ackToSenderPayload);
@@ -273,18 +273,38 @@ public class FinChannel extends FinApiObject {
 		return channelClientFuture;
 	}
 
+	/**
+	 * Adds the listener to the listener list to get the event when a ChannelProvider connects to OpenFin Runtime.
+	 * @param listener The listener to be added.
+	 * @return true if the lister is added to the end of the listener list.
+	 */
 	public boolean addChannelConnectListener(FinEventListener listener) {
 		return this.channelConnectListeners.add(listener);
 	}
 	
+	/**
+	 * Adds the listener to the listener list to get the event when a ChannelProvider disconnects from OpenFin Runtime.
+	 * @param listener The listener to be added.
+	 * @return true if the lister is added to the end of the listener list.
+	 */
 	public boolean addChannelDisconnectListener(FinEventListener listener) {
 		return this.channelDisconnectListeners.add(listener);
 	}
 	
+	/**
+	 * Removes the listener from the listener list that gets the event when a ChannelProvider connects to OpenFin Runtime.
+	 * @param listener The listener to be removed.
+	 * @return true if the listener is removed from the listener list.
+	 */
 	public boolean removeChannelConnectListener(FinEventListener listener) {
 		return this.channelConnectListeners.remove(listener);
 	}
 	
+	/**
+	 * Removes the listener from the listener list that gets the event when a ChannelProvider disconnects from OpenFin Runtime.
+	 * @param listener The listener to be removed.
+	 * @return true if the listener is removed from the listener list.
+	 */
 	public boolean removeChannelDisconnectListener(FinEventListener listener) {
 		return this.channelDisconnectListeners.remove(listener);
 	}

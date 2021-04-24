@@ -11,6 +11,10 @@ public class FinInstanceObject extends FinApiObject {
 		this.identity = identity;
 	}
 
+	/**
+	 * Gets the identity of this instance.
+	 * @return The identity of this instance.
+	 */
 	public Identity getIdentity() {
 		return identity;
 	}

@@ -6,6 +6,10 @@ import com.sun.jna.Platform;
 
 public interface FinLauncher {
 
+	/**
+	 * Gets a new FinLauncherBuilder.
+	 * @return The new FinLauncherBuilder.
+	 */
 	public static FinLauncherBuilder newLauncherBuilder() {
 		if (Platform.isWindows()) {
 			return new FinRvmLauncherBuilder();

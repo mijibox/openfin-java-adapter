@@ -62,10 +62,19 @@ public class FinChannelBase extends FinApiObject {
 		}
 	}
 	
-	public boolean hasActionListener(String action) {
+	/**
+	 * Checks the availability of specified action.
+	 * @param action The action name
+	 * @return true if it has such action registered.
+	 */
+	public boolean hasAction(String action) {
 		return this.actionMap.containsKey(action) || this.defaultAction != null;
 	}
 
+	/**
+	 * Gets the default action.
+	 * @return The default action, null if not set.
+	 */
 	public FinChannelMiddleware getDefaultAction() {
 		return defaultAction;
 	}
@@ -78,6 +87,10 @@ public class FinChannelBase extends FinApiObject {
 		this.defaultAction = defaultAction;
 	}
 
+	/**
+	 * Gets the error handler.
+	 * @return the error handler
+	 */
 	public FinChannelMiddleware getOnError() {
 		return onError;
 	}
@@ -90,6 +103,10 @@ public class FinChannelBase extends FinApiObject {
 		this.onError = onError;
 	}
 
+	/**
+	 * Gets the "beforeAction" handler.
+	 * @return the "beforeAction" handler
+	 */
 	public FinChannelMiddleware getBeforeAction() {
 		return beforeAction;
 	}
@@ -102,6 +119,10 @@ public class FinChannelBase extends FinApiObject {
 		this.beforeAction = beforeAction;
 	}
 
+	/**
+	 * Gets the "afterAction" handler.
+	 * @return the "afterAction" handler
+	 */
 	public FinChannelMiddleware getAfterAction() {
 		return afterAction;
 	}

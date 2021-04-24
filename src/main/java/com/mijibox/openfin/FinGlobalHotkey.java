@@ -15,6 +15,11 @@ import org.slf4j.LoggerFactory;
 import com.mijibox.openfin.bean.FinBeanUtils;
 import com.mijibox.openfin.bean.Identity;
 
+/**
+ * The GlobalHotkey module can register/unregister a global hotkeys.
+ * @author Anthony
+ *
+ */
 public class FinGlobalHotkey extends FinApiObject {
 	
 	@FunctionalInterface
@@ -50,6 +55,12 @@ public class FinGlobalHotkey extends FinApiObject {
 		});
 	}
 	
+	/**
+	 * Registers a global hotkey listener with the operating system.
+	 * @param hotkey A hotkey string.
+	 * @param listener The listener to call when the registered hotkey is pressed by the user.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> register(String hotkey, HotkeyListener listener) {
 		AtomicBoolean first = new AtomicBoolean(false);
 		this.listenerMap.compute(hotkey, (key, listeners)->{
@@ -77,6 +88,12 @@ public class FinGlobalHotkey extends FinApiObject {
 		}
 	}
 
+	/**
+	 * Unregisters a global hotkey with the operating system.
+	 * @param hotkey The hotkey string
+	 * @param listener The listener to be removed
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> unregister(String hotkey, HotkeyListener listener) {
 		AtomicBoolean last = new AtomicBoolean(false);
 		this.listenerMap.computeIfPresent(hotkey, (key, existingListeners)->{
@@ -96,6 +113,11 @@ public class FinGlobalHotkey extends FinApiObject {
 		}
 	}
 
+	/**
+	 * Checks if a given hotkey has been registered
+	 * @param hotkey The hotkey
+	 * @return A new CompletionStage of the result.
+	 */
 	public CompletionStage<Boolean> isRegistered(String hotkey) {
 		return this.finConnection.sendMessage("global-hotkey-is-registered", Json.createObjectBuilder().add("hotkey", hotkey).build()).thenApply(ack->{
 			if (!ack.isSuccess()) {

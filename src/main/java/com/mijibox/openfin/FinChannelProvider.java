@@ -35,6 +35,10 @@ public class FinChannelProvider extends FinChannelBase {
 		this.clientDisconnectListeners = new CopyOnWriteArrayList<>();
 	}
 
+	/**
+	 * Gets the identity of this ChannelProvider instance.
+	 * @return The identity of the ChannelProvider.
+	 */
 	public ProviderIdentity getProviderIdentity() {
 		return providerIdentity;
 	}
@@ -47,10 +51,21 @@ public class FinChannelProvider extends FinChannelBase {
 				.add("payload", connectionPayload == null ? JsonValue.NULL : connectionPayload).build()));
 	}
 	
+	/**
+	 * Publish an action to every connected client.
+	 * @param action The action name.
+	 * @return A list of new CompletionStage of the result of the action executed by each ChannelClients.
+	 */
 	public List<CompletionStage<JsonValue>> publish(String action) {
 		return this.publish(action, null);
 	}
 	
+	/**
+	 * Publish an action with payload to every connected client.
+	 * @param action The action name.
+	 * @param payload The action payload.
+	 * @return A list of new CompletionStage of the result of the action executed by each ChannelClients.
+	 */
 	public List<CompletionStage<JsonValue>> publish(String action, JsonValue payload) {
 		ArrayList<CompletionStage<JsonValue>> futures = new ArrayList<>(this.channelClients.size());
 		this.channelClients.forEach(clientIdentity -> {
@@ -59,10 +74,23 @@ public class FinChannelProvider extends FinChannelBase {
 		return futures;
 	}
 	
+	/**
+	 * Dispatch an action to a specified client. 
+	 * @param clientIdentity The identity of the ChannelClient.
+	 * @param action The action name.
+	 * @return A new CompletionStage for the result of the action returned by the ChannelClient.
+	 */
 	public CompletionStage<JsonValue> dispatch(ClientIdentity clientIdentity, String action) {
 		return this.dispatch(clientIdentity, action, null);
 	}
 	
+	/**
+	 * Dispatch an action with payload to a specified client. 
+	 * @param clientIdentity The identity of the ChannelClient.
+	 * @param action The action name.
+	 * @param payload The action payload.
+	 * @return A new CompletionStage for the result of the action returned by the ChannelClient.
+	 */
 	public CompletionStage<JsonValue> dispatch(ClientIdentity clientIdentity, String action, JsonValue payload) {
 		JsonObjectBuilder builder = Json.createObjectBuilder(FinBeanUtils.toJsonObject(clientIdentity))
 				.add("providerIdentity", FinBeanUtils.toJsonObject(this.providerIdentity)).add("action", action);
@@ -79,6 +107,10 @@ public class FinChannelProvider extends FinChannelBase {
 		});
 	}
 
+	/**
+	 * Destroy the channel.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> destroy() {
 		return this.finConnection
 				.sendMessage("destroy-channel",
@@ -90,18 +122,38 @@ public class FinChannelProvider extends FinChannelBase {
 				});
 	}
 	
+	/**
+	 * Registers a listener that is called when a ChannelClient is connected.
+	 * @param listener The listener to be added.
+	 * @return true if the listener is added to the end of the listener list.
+	 */
 	public boolean addClientConnectListener(FinEventListener listener) {
 		return this.clientConnectListeners.add(listener);
 	}
 	
+	/**
+	 * Registers a listener that is called when a ChannelClient is disconnected.
+	 * @param listener The listener to be added.
+	 * @return true if the listener is added to the end of the listener list.
+	 */
 	public boolean addClientDisconnectListener(FinEventListener listener) {
 		return this.clientDisconnectListeners.add(listener);
 	}
 	
+	/**
+	 * Removes the listener from the client connect listener list.
+	 * @param listener The listener to be removed.
+	 * @return true if the listener is removed from the listener list.
+	 */
 	public boolean removeClientConnectListener(FinEventListener listener) {
 		return this.clientConnectListeners.remove(listener);
 	}
 	
+	/**
+	 * Removes the listener from the client disconnect listener list.
+	 * @param listener The listener to be removed.
+	 * @return true if the listener is removed from the listener list.
+	 */
 	public boolean removeClientDisconnectListener(FinEventListener listener) {
 		return this.clientDisconnectListeners.remove(listener);
 	}
