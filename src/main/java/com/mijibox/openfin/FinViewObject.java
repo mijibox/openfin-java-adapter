@@ -23,6 +23,10 @@ public class FinViewObject extends FinWebContent {
 		super(finConnection, identity);
 	}
 
+	/**
+	 * Retrieves the window the view is currently attached to.
+	 * @return A new CompletionStage for the window the view is currently attached to.
+	 */
 	public CompletionStage<FinWindowObject> getCurrentWindow() {
 		return this.finConnection.sendMessage("get-view-window", FinBeanUtils.toJsonObject(identity)).thenApply(ack -> {
 			return new FinWindowObject(this.finConnection,
@@ -38,6 +42,15 @@ public class FinViewObject extends FinWebContent {
 		return this.finConnection._subscriptionManager.removeListener(this.identity, "view", eventType, listener);
 	}
 
+	/**
+	 * Attaches the current view to a the given window identity. Identity must be
+	 * the identity of a window in the same application. This detaches the view from
+	 * its current window, and sets the view to be destroyed when its new window
+	 * closes.
+	 * 
+	 * @param target Target window identity
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> attach(Identity target) {
 		return this.finConnection
 				.sendMessage("attach-view", Json.createObjectBuilder(FinBeanUtils.toJsonObject(this.identity))
@@ -49,6 +62,10 @@ public class FinViewObject extends FinWebContent {
 				});
 	}
 
+	/**
+	 * Destroys the current view. 
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> destroy() {
 		return this.finConnection.sendMessage("destroy-view", FinBeanUtils.toJsonObject(this.identity))
 				.thenAccept(ack -> {
@@ -58,6 +75,10 @@ public class FinViewObject extends FinWebContent {
 				});
 	}
 
+	/**
+	 * Shows the current view if it is currently hidden.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> show() {
 		return this.finConnection.sendMessage("show-view", FinBeanUtils.toJsonObject(this.identity)).thenAccept(ack -> {
 			if (!ack.isSuccess()) {
@@ -66,6 +87,10 @@ public class FinViewObject extends FinWebContent {
 		});
 	}
 
+	/**
+	 * Hides the current view if it is currently visible.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> hide() {
 		return this.finConnection.sendMessage("hide-view", FinBeanUtils.toJsonObject(this.identity)).thenAccept(ack -> {
 			if (!ack.isSuccess()) {
@@ -74,6 +99,10 @@ public class FinViewObject extends FinWebContent {
 		});
 	}
 	
+	/**
+	 * Gets the View's options.
+	 * @return A new CompletionStage for the view's options.
+	 */
 	public CompletionStage<ViewOptions> getOptions() {
 		return this.finConnection.sendMessage("get-view-options", FinBeanUtils.toJsonObject(this.identity)).thenApply(ack -> {
 			if (ack.isSuccess()) {
@@ -85,6 +114,11 @@ public class FinViewObject extends FinWebContent {
 		});
 	}
 	
+	/**
+	 * Updates the view's options.
+	 * @param options the new view options.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> updateOptions(ViewOptions options) {
 		JsonObject payload = Json.createObjectBuilder(FinBeanUtils.toJsonObject(this.identity)).add("options", FinBeanUtils.toJsonObject(options)).build();
 		return this.finConnection.sendMessage("update-view-options", payload).thenAccept(ack -> {
