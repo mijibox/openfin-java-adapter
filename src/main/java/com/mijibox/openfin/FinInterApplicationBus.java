@@ -35,7 +35,7 @@ public class FinInterApplicationBus extends FinApiObject {
 				this.processMessage(payload);
 			}
 		};
-		this.finConnection.addMessageListener(this.ofMessageListener);
+		this.finConnection.addIncomingMessageListener(this.ofMessageListener);
 	}
 
 	/**

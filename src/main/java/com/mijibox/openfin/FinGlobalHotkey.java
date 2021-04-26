@@ -34,7 +34,7 @@ public class FinGlobalHotkey extends FinApiObject {
 	FinGlobalHotkey(FinConnectionImpl finConnection) {
 		super(finConnection);
 		this.listenerMap = new ConcurrentHashMap<>();
-		this.finConnection.addMessageListener((action, payload)->{
+		this.finConnection.addIncomingMessageListener((action, payload)->{
 			if ("process-desktop-event".equals(action)) {
 				String topic = payload.getString("topic");
 				if ("global-hotkey".equals(topic)) {

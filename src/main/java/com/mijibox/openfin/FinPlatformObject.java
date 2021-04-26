@@ -70,6 +70,10 @@ public class FinPlatformObject extends FinInstanceObject {
 		});
 	}
 
+	/**
+	 * Closes current platform, all its windows, and their views.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> quit() {
 //		return this.channelClient.thenCompose(client->{
 //			return client.dispatch("quit").thenAccept(result->{
@@ -78,6 +82,11 @@ public class FinPlatformObject extends FinInstanceObject {
 		return this.appObj.quit(true);
 	}
 	
+	/**
+	 * Closes a specified view in a target window.
+	 * @param view The view to be closed.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> closeView(FinViewObject view) {
 		JsonObject payload = Json.createObjectBuilder().add("view", FinBeanUtils.toJsonObject(view.getIdentity())).build();
 		return this.channelClient.thenCompose(client->{
@@ -86,6 +95,12 @@ public class FinPlatformObject extends FinInstanceObject {
 		});
 	}
 	
+	/**
+	 * Returns a snapshot of the platform in its current state. Can be used to
+	 * restore an application to a previous state.
+	 * 
+	 * @return A new CompletionStage for the snapshot.
+	 */
 	public CompletionStage<Snapshot> getSnapshot() {
 		return this.channelClient.thenCompose(client->{
 			return client.dispatch("get-snapshot").thenApply(result->{
@@ -94,6 +109,12 @@ public class FinPlatformObject extends FinInstanceObject {
 		});
 	}
 	
+	/**
+	 * Adds a snapshot to a running Platform. Can optionally close existing windows and overwrite current platform state with that of a snapshot.
+	 * @param requestedSnapshot Snapshot URL or file path.
+	 * @param options Optional parameters to be used when applying the snapshot.
+	 * @return A new CompletionStage for the Platform instance.
+	 */
 	public CompletionStage<FinPlatformObject> applySnapshot(String requestedSnapshot, ApplySnapshotOptions options) {
 		return this.finConnection.sendMessage("get-application-manifest", Json.createObjectBuilder().add("manifestUrl", requestedSnapshot).build()).thenApply(ack->{
 			return ack.getData().asJsonObject();
@@ -110,6 +131,12 @@ public class FinPlatformObject extends FinInstanceObject {
 		});
 	}
 	
+	/**
+	 * Adds a snapshot to a running Platform. Can optionally close existing windows and overwrite current platform state with that of a snapshot.
+	 * @param snapshot Snapshot data.
+	 * @param options Optional parameters to be used when applying the snapshot.
+	 * @return A new CompletionStage for the Platform instance.
+	 */
 	public CompletionStage<FinPlatformObject> applySnapshot(Snapshot snapshot, ApplySnapshotOptions options) {
 		JsonObjectBuilder builder = Json.createObjectBuilder().add("snapshot", FinBeanUtils.toJsonObject(snapshot));
 		if (options != null) {
@@ -123,7 +150,7 @@ public class FinPlatformObject extends FinInstanceObject {
 	}
 	
 
-	public CompletionStage<FinChannelClient> getChannelClient() {
+	CompletionStage<FinChannelClient> getChannelClient() {
 		return this.channelClient;
 	}
 	

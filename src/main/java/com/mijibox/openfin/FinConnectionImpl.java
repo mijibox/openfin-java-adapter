@@ -289,26 +289,10 @@ public class FinConnectionImpl implements FinRuntimeConnection, Listener {
 		}
 	}
 
-	/**
-	 * Send API message to OpenFin runtime.
-	 * 
-	 * @param action
-	 *            action name
-	 * @return response Ack from the action
-	 */
 	public CompletionStage<Ack> sendMessage(String action) {
 		return this.sendMessage(action, JsonValue.EMPTY_JSON_OBJECT);
 	}
 
-	/**
-	 * Send API message to OpenFin runtime with action payload.
-	 * 
-	 * @param action
-	 *            action name
-	 * @param payload
-	 *            action payload
-	 * @return response Ack from the action
-	 */
 	public CompletionStage<Ack> sendMessage(String action, JsonObject payload) {
 		if (this.connected && this.running.get()) {
 			CompletableFuture<Ack> ackFuture = new CompletableFuture<>();
@@ -400,12 +384,12 @@ public class FinConnectionImpl implements FinRuntimeConnection, Listener {
 	}
 
 	@Override
-	public boolean addMessageListener(MessageListener listener) {
+	public boolean addIncomingMessageListener(MessageListener listener) {
 		return this.ofMessageListeners.add(listener);
 	}
 
 	@Override
-	public boolean removeMessageListener(MessageListener listener) {
+	public boolean removeIncomingMessageListener(MessageListener listener) {
 		return this.ofMessageListeners.remove(listener);
 	}
 

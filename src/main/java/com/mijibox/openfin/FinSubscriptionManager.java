@@ -24,7 +24,7 @@ public class FinSubscriptionManager extends FinApiObject {
 	FinSubscriptionManager(FinConnectionImpl finConnection) {
 		super(finConnection);
 		this.listenerMap = new ConcurrentHashMap<>();
-		this.finConnection.addMessageListener((action, payload)->{
+		this.finConnection.addIncomingMessageListener((action, payload)->{
 			FinEvent event = new FinEvent(payload);
 			if ("process-desktop-event".equals(action)) {
 				Identity identity = FinBeanUtils.fromJsonObject(payload, Identity.class); //uuid and name

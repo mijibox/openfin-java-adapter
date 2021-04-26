@@ -43,7 +43,7 @@ public class FinChannel extends FinApiObject {
 		this.channelDisconnectListeners = new CopyOnWriteArrayList<>();
 		this.pendingConnectionsMap = new ConcurrentHashMap<>();
 
-		finConnection.addMessageListener((action, payload) -> {
+		finConnection.addIncomingMessageListener((action, payload) -> {
 			if ("process-channel-message".equals(action)) {
 				this.processChannelMessage(payload);
 			}
