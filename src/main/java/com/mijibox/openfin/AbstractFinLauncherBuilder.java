@@ -131,7 +131,7 @@ public abstract class AbstractFinLauncherBuilder implements FinLauncherBuilder {
 	
 	Executor getExecutor() {
 		if (this.executor == null) {
-			this.executor = FinRuntime.getCommonPool();
+			this.executor = ForkJoinPool.commonPool();
 		}
 		return this.executor;
 	}

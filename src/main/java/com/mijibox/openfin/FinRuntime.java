@@ -5,6 +5,8 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class FinRuntime {
 	
@@ -73,17 +75,6 @@ public class FinRuntime {
 		this.View = this.finConnection._view;
 		this.Window = this.finConnection._window;
 		this.SubscriptionManager = this.finConnection._subscriptionManager;
-	}
-	
-	/**
-	 * Cached Thread Pool
-	 * @return static thread pool instance
-	 */
-	public static ExecutorService getCommonPool() {
-		if (commonPool == null) {
-			commonPool = Executors.newCachedThreadPool();
-		}
-		return commonPool;
 	}
 	
 	/**
