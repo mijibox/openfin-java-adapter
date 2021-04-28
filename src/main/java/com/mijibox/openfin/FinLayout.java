@@ -17,6 +17,8 @@ public class FinLayout extends FinApiObject {
 	 * @return OfLayout object that represents a Window's layout.
 	 */
 	public CompletionStage<FinLayoutObject> wrap(Identity identity) {
-		return CompletableFuture.completedStage(new FinLayoutObject(this.finConnection, identity));
+		return CompletableFuture.supplyAsync(()->{
+			return new FinLayoutObject(this.finConnection, identity);
+		}, this.finConnection.executor);
 	}
 }

@@ -223,10 +223,8 @@ public class FinApplicationObject extends FinInstanceObject {
 	 * @return
 	 */
 	public CompletionStage<FinWindowObject> getWindow() {
-		if (this.window == null) {
-			this.window = new FinWindowObject(this.finConnection, new Identity(this.identity.getUuid(), this.identity.getUuid()));
-		}
-		return CompletableFuture.completedStage(this.window);
+		String uuid = this.identity.getUuid();
+		return this.finConnection._window.wrap(new Identity(uuid, uuid));
 	}
 	
 	/**

@@ -93,7 +93,8 @@ public class FinApplication extends FinApiObject {
 	 * @return new CompletionStage for the application instance.
 	 */
 	public CompletionStage<FinApplicationObject> wrap(Identity identity) {
-		FinApplicationObject appObj = new FinApplicationObject(this.finConnection, identity);
-		return CompletableFuture.completedStage(appObj);
+		return CompletableFuture.supplyAsync(()->{
+			return new FinApplicationObject(this.finConnection, identity);
+		}, this.finConnection.executor);
 	}
 }

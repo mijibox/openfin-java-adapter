@@ -84,42 +84,43 @@ public class FinInterApplicationBus extends FinApiObject {
 	 * @param listener The listener that is called when a message has been received
 	 * @return the new CompletionStage
 	 */
-	public CompletionStage<Void> subscribe(Identity source, String topic, FinIabMessageListener listener) {
-		if (source == null) {
-			source = new Identity();
-		}
-		String uuid = source.getUuid() == null ? "*" : source.getUuid();
-		String name = source.getName() == null ? "*" : source.getName();
-		String key = this.getSubscriptionKey(uuid, name, topic);
-		CopyOnWriteArrayList<FinIabMessageListener> listeners = this.listenerMap.get(key);
-		if (listeners == null) {
-			CopyOnWriteArrayList<FinIabMessageListener> existingListener = this.listenerMap.putIfAbsent(key,
-					new CopyOnWriteArrayList<>(new FinIabMessageListener[] { listener }));
-			if (existingListener == null) {
-				// first one, send out the subscription
-				JsonObject payload = Json.createObjectBuilder()
-						.add("sourceUuid", uuid)
-						.add("sourceWindowName", name)
-						.add("topic", topic).build();
-				return this.finConnection.sendMessage("subscribe", payload).thenAccept(ack -> {
-					if (!ack.isSuccess()) {
-						throw new RuntimeException(
-								"error subscribe, reason: " + ack.getReason());
-					}
-					logger.debug("added listener to new listener list, size={}", this.listenerMap.get(key).size());
-				});
+	public CompletionStage<Void> subscribe(Identity identity, String topic, FinIabMessageListener listener) {
+		Identity source = identity == null ? new Identity() : identity;
+		return CompletableFuture.runAsync(()->{
+		}, this.finConnection.executor).thenCompose(v->{
+			String uuid = source.getUuid() == null ? "*" : source.getUuid();
+			String name = source.getName() == null ? "*" : source.getName();
+			String key = this.getSubscriptionKey(uuid, name, topic);
+			CopyOnWriteArrayList<FinIabMessageListener> listeners = this.listenerMap.get(key);
+			if (listeners == null) {
+				CopyOnWriteArrayList<FinIabMessageListener> existingListener = this.listenerMap.putIfAbsent(key,
+						new CopyOnWriteArrayList<>(new FinIabMessageListener[] { listener }));
+				if (existingListener == null) {
+					// first one, send out the subscription
+					JsonObject payload = Json.createObjectBuilder()
+							.add("sourceUuid", uuid)
+							.add("sourceWindowName", name)
+							.add("topic", topic).build();
+					return this.finConnection.sendMessage("subscribe", payload).thenAccept(ack -> {
+						if (!ack.isSuccess()) {
+							throw new RuntimeException(
+									"error subscribe, reason: " + ack.getReason());
+						}
+						logger.debug("added listener to new listener list, size={}", this.listenerMap.get(key).size());
+					});
+				}
+				else {
+					existingListener.add(listener);
+					logger.debug("added listener to exising listener list, size={}", existingListener.size());
+					return CompletableFuture.completedStage(null);
+				}
 			}
 			else {
-				existingListener.add(listener);
-				logger.debug("added listener to exising listener list, size={}", existingListener.size());
+				listeners.add(listener);
+				logger.debug("added listener to exising listener list, size={}", listeners.size());
 				return CompletableFuture.completedStage(null);
 			}
-		}
-		else {
-			listeners.add(listener);
-			logger.debug("added listener to exising listener list, size={}", listeners.size());
-			return CompletableFuture.completedStage(null);
-		}
+		});
 	}
 
 	/**
@@ -129,34 +130,37 @@ public class FinInterApplicationBus extends FinApiObject {
 	 * @param listener the listener previously registered with subscribe()
 	 * @return the new CompletionStage
 	 */
-	public CompletionStage<Void> unsubscribe(Identity source, String topic, FinIabMessageListener listener) {
-		String uuid = source.getUuid() == null ? "*" : source.getUuid();
-		String name = source.getName() == null ? "*" : source.getName();
-		String key = this.getSubscriptionKey(uuid, name, topic);
-		CopyOnWriteArrayList<FinIabMessageListener> listeners = this.listenerMap.get(key);
-		if (listeners != null) {
-			boolean removed = listeners.remove(listener);
-			if (removed && listeners.size() == 0) {
-				//last one, unsubscribe the topic
-				JsonObject payload = Json.createObjectBuilder()
-						.add("sourceUuid", uuid)
-						.add("sourceWindowName", name)
-						.add("topic", topic).build();
-				return this.finConnection.sendMessage("unsubscribe", payload).thenAcceptAsync(ack -> {
-					if (!ack.isSuccess()) {
-						throw new RuntimeException("error unsubscribe, reason: " + ack.getReason());
-					}
-				});
+	public CompletionStage<Void> unsubscribe(Identity identity, String topic, FinIabMessageListener listener) {
+		Identity source = identity == null ? new Identity() : identity;
+		return CompletableFuture.runAsync(()->{
+		}, this.finConnection.executor).thenCompose(v->{
+			String uuid = source.getUuid() == null ? "*" : source.getUuid();
+			String name = source.getName() == null ? "*" : source.getName();
+			String key = this.getSubscriptionKey(uuid, name, topic);
+			CopyOnWriteArrayList<FinIabMessageListener> listeners = this.listenerMap.get(key);
+			if (listeners != null) {
+				boolean removed = listeners.remove(listener);
+				if (removed && listeners.size() == 0) {
+					//last one, unsubscribe the topic
+					JsonObject payload = Json.createObjectBuilder()
+							.add("sourceUuid", uuid)
+							.add("sourceWindowName", name)
+							.add("topic", topic).build();
+					return this.finConnection.sendMessage("unsubscribe", payload).thenAcceptAsync(ack -> {
+						if (!ack.isSuccess()) {
+							throw new RuntimeException("error unsubscribe, reason: " + ack.getReason());
+						}
+					});
+				}
+				else {
+					return CompletableFuture.completedStage(null);
+				}
 			}
 			else {
+				//should be error
 				return CompletableFuture.completedStage(null);
 			}
-		}
-		else {
-			//should be error
-			return CompletableFuture.completedStage(null);
-		}
-		
+		});
 	}
 
 	private String getSubscriptionKey(String uuid, String name, String topic) {

@@ -12,7 +12,9 @@ public class FinView extends FinApiObject {
 	}
 
 	public CompletionStage<FinViewObject> wrap(Identity identity) {
-		return CompletableFuture.completedStage(new FinViewObject(this.finConnection, identity));
+		return CompletableFuture.supplyAsync(()->{
+			return new FinViewObject(this.finConnection, identity);
+		}, this.finConnection.executor);
 	}
 	
 }

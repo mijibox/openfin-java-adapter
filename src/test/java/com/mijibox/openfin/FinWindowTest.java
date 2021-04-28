@@ -95,9 +95,9 @@ public class FinWindowTest {
 	public void navigate() throws Exception {
 		TestUtils.runSync(ofWindowObject.navigate("https://www.google.com"));
 		Thread.sleep(500);
-		TestUtils.runSync(ofWindowObject.navigate("https://www.apple.com"));
-		Thread.sleep(500);
 		TestUtils.runSync(ofWindowObject.navigate("https://www.bing.com"));
+		Thread.sleep(500);
+		TestUtils.runSync(ofWindowObject.navigate("https://www.google.com"));
 		Thread.sleep(100);
 		TestUtils.runSync(ofWindowObject.stopNavigation());
 		Thread.sleep(500);

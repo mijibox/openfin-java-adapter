@@ -62,30 +62,33 @@ public class FinGlobalHotkey extends FinApiObject {
 	 * @return A new CompletionStage for the task.
 	 */
 	public CompletionStage<Void> register(String hotkey, HotkeyListener listener) {
-		AtomicBoolean first = new AtomicBoolean(false);
-		this.listenerMap.compute(hotkey, (key, listeners)->{
-			if (listeners == null) {
-				first.set(true);
-				return new CopyOnWriteArrayList<>(new HotkeyListener[] {listener});
-			}
-			else {
-				if (listeners.size() == 0) {
+		return CompletableFuture.runAsync(()->{
+		}, this.finConnection.executor).thenCompose(v->{
+			AtomicBoolean first = new AtomicBoolean(false);
+			this.listenerMap.compute(hotkey, (key, listeners)->{
+				if (listeners == null) {
 					first.set(true);
+					return new CopyOnWriteArrayList<>(new HotkeyListener[] {listener});
 				}
-				listeners.add(listener);
-				return listeners;
-			}
-		});
-		if (first.get()) {
-			return this.finConnection.sendMessage("global-hotkey-register", Json.createObjectBuilder().add("hotkey", hotkey).build()).thenAccept(ack->{
-				if (!ack.isSuccess()) {
-					throw new RuntimeException("error register hotkey, reason: " + ack.getReason());
+				else {
+					if (listeners.size() == 0) {
+						first.set(true);
+					}
+					listeners.add(listener);
+					return listeners;
 				}
 			});
-		}
-		else {
-			return CompletableFuture.completedStage(null);
-		}
+			if (first.get()) {
+				return this.finConnection.sendMessage("global-hotkey-register", Json.createObjectBuilder().add("hotkey", hotkey).build()).thenAccept(ack->{
+					if (!ack.isSuccess()) {
+						throw new RuntimeException("error register hotkey, reason: " + ack.getReason());
+					}
+				});
+			}
+			else {
+				return CompletableFuture.completedStage(null);
+			}
+		});
 	}
 
 	/**
@@ -95,22 +98,25 @@ public class FinGlobalHotkey extends FinApiObject {
 	 * @return A new CompletionStage for the task.
 	 */
 	public CompletionStage<Void> unregister(String hotkey, HotkeyListener listener) {
-		AtomicBoolean last = new AtomicBoolean(false);
-		this.listenerMap.computeIfPresent(hotkey, (key, existingListeners)->{
-			boolean removed = existingListeners.remove(listener);
-			last.set(removed && existingListeners.size() == 0);
-			return existingListeners;
-		});
-		if (last.get()) {
-			return this.finConnection.sendMessage("global-hotkey-unregister", Json.createObjectBuilder().add("hotkey", hotkey).build()).thenAccept(ack->{
-				if (!ack.isSuccess()) {
-					throw new RuntimeException("error unregister hotkey, reason: " + ack.getReason());
-				}
+		return CompletableFuture.runAsync(()->{
+		}, this.finConnection.executor).thenCompose(v->{
+			AtomicBoolean last = new AtomicBoolean(false);
+			this.listenerMap.computeIfPresent(hotkey, (key, existingListeners)->{
+				boolean removed = existingListeners.remove(listener);
+				last.set(removed && existingListeners.size() == 0);
+				return existingListeners;
 			});
-		}
-		else {
-			return CompletableFuture.completedStage(null);
-		}
+			if (last.get()) {
+				return this.finConnection.sendMessage("global-hotkey-unregister", Json.createObjectBuilder().add("hotkey", hotkey).build()).thenAccept(ack->{
+					if (!ack.isSuccess()) {
+						throw new RuntimeException("error unregister hotkey, reason: " + ack.getReason());
+					}
+				});
+			}
+			else {
+				return CompletableFuture.completedStage(null);
+			}
+		});
 	}
 
 	/**

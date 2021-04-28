@@ -18,6 +18,8 @@ public class FinWindow extends FinApiObject {
 	 * @return
 	 */
 	public CompletionStage<FinWindowObject> wrap(Identity identity) {
-		return CompletableFuture.completedStage(new FinWindowObject(this.finConnection, identity));
+		return CompletableFuture.supplyAsync(()->{
+			return new FinWindowObject(this.finConnection, identity);
+		}, this.finConnection.executor);
 	}
 }
