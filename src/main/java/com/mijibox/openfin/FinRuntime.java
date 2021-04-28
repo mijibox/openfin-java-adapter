@@ -9,9 +9,6 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class FinRuntime {
-	
-	private static ExecutorService commonPool;
-	
 	/**
 	 * API Object for OpenFin Application
 	 */

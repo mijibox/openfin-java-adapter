@@ -107,7 +107,7 @@ public class FinWindowTest {
 		Thread.sleep(500);
 		TestUtils.runSync(ofWindowObject.navigateForward());
 		Thread.sleep(500);
-		TestUtils.runSync(ofWindowObject.reload(true));
+		TestUtils.runSync(ofWindowObject.reload());
 		Thread.sleep(500);
 	}
 

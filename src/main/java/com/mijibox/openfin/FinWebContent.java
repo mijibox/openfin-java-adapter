@@ -44,6 +44,11 @@ public class FinWebContent extends FinInstanceObject {
 		super(finConnection, identity);
 	}
 
+	/**
+	 * Gets a base64 encoded image of the page or a part of it.
+	 * @param options Options for the capturePage call.
+	 * @return A new CompletionStage for string of the encoded image.
+	 */
 	public CompletionStage<String> capturePage(CapturePageOptions options) {
 		JsonObjectBuilder builder = Json.createObjectBuilder(FinBeanUtils.toJsonObject(this.identity));
 		if (options != null) {
@@ -62,11 +67,9 @@ public class FinWebContent extends FinInstanceObject {
 	}
 
 	/**
-	 * Executes Javascript on the window, restricted to windows you own or windows
-	 * owned by applications you have created.
-	 * 
-	 * @param code
-	 * @return
+	 * Executes JavaScript code.
+	 * @param code The JavaScript code to be executed.
+	 * @return A new CompletionStage for the result of executing the code.
 	 */
 	public CompletionStage<JsonValue> executeJavaScript(String code) {
 		return this.finConnection
@@ -82,6 +85,12 @@ public class FinWebContent extends FinInstanceObject {
 				});
 	}
 
+	/**
+	 * Find and highlight text on a page.
+	 * @param searchTerm Term to find in page.
+	 * @param options Search options.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> findInPage(String searchTerm, FindInPageOptions options) {
 		JsonObject payload = Json.createObjectBuilder(FinBeanUtils.toJsonObject(this.identity))
 				.add("searchTerm", searchTerm)
@@ -93,6 +102,10 @@ public class FinWebContent extends FinInstanceObject {
 		});
 	}
 
+	/**
+	 * Gets the focus.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> focus() {
 		JsonObject payload = Json.createObjectBuilder(FinBeanUtils.toJsonObject(this.identity))
 				.add("emitSynthFocused", true).build();
@@ -103,6 +116,10 @@ public class FinWebContent extends FinInstanceObject {
 		});
 	}
 
+	/**
+	 * Returns an array with all system printers.
+	 * @return A new CompletionStage for the information of all printers.
+	 */
 	public CompletionStage<PrinterInfo[]> getPrinters() {
 		return this.finConnection.sendMessage("get-printers", FinBeanUtils.toJsonObject(this.identity)).thenApply(ack -> {
 			if (ack.isSuccess()) {
@@ -119,6 +136,10 @@ public class FinWebContent extends FinInstanceObject {
 		});
 	}
 
+	/**
+	 * Gets the zoom level.
+	 * @return A new CompletionStage for the zoom level.
+	 */
 	public CompletionStage<Integer> getZoomLevel() {
 		return this.finConnection.sendMessage("get-zoom-level", FinBeanUtils.toJsonObject(this.identity))
 				.thenApply(ack -> {
@@ -131,6 +152,10 @@ public class FinWebContent extends FinInstanceObject {
 				});
 	}
 
+	/**
+	 * Navigates back.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> navigateBack() {
 		return this.finConnection.sendMessage("navigate-window-back", FinBeanUtils.toJsonObject(this.identity))
 				.thenAccept(ack -> {
@@ -140,6 +165,10 @@ public class FinWebContent extends FinInstanceObject {
 				});
 	}
 
+	/**
+	 * Navigates forward.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> navigateForward() {
 		return this.finConnection.sendMessage("navigate-window-forward", FinBeanUtils.toJsonObject(this.identity))
 				.thenAccept(ack -> {
@@ -149,6 +178,11 @@ public class FinWebContent extends FinInstanceObject {
 				});
 	}
 
+	/**
+	 * Navigates to specified URL.
+	 * @param url The URL to navigate to.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> navigate(String url) {
 		JsonObject payload = Json.createObjectBuilder(FinBeanUtils.toJsonObject(this.identity)).add("url", url).build();
 		return this.finConnection.sendMessage("navigate-window", payload).thenAccept(ack -> {
@@ -158,6 +192,11 @@ public class FinWebContent extends FinInstanceObject {
 		});
 	}
 
+	/**
+	 * Prints the page.
+	 * @param options Printer options.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> print(PrintOptions options) {
 		JsonObject payload = Json.createObjectBuilder(FinBeanUtils.toJsonObject(this.identity))
 				.add("options", options == null ? JsonValue.NULL : FinBeanUtils.toJsonObject(options)).build();
@@ -168,9 +207,12 @@ public class FinWebContent extends FinInstanceObject {
 		});
 	}
 
-	public CompletionStage<Void> reload(boolean ignoreCache) {
-		JsonObject payload = Json.createObjectBuilder(FinBeanUtils.toJsonObject(this.identity))
-				.add("ignoreCache", ignoreCache).build();
+	/**
+	 * Reloads the page.
+	 * @return A new CompletionStage for the task.
+	 */
+	public CompletionStage<Void> reload() {
+		JsonObject payload = Json.createObjectBuilder(FinBeanUtils.toJsonObject(this.identity)).build();
 		return this.finConnection.sendMessage("reload-window", payload).thenAccept(ack -> {
 			if (!ack.isSuccess()) {
 				throw new RuntimeException("error reload-window, reason: " + ack.getReason());
@@ -178,6 +220,11 @@ public class FinWebContent extends FinInstanceObject {
 		});
 	}
 
+	/**
+	 * Sets the zoom level
+	 * @param zoomLevel The zoom level to set to.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> setZoomLevel(int zoomLevel) {
 		JsonObject payload = Json.createObjectBuilder(FinBeanUtils.toJsonObject(identity)).add("level", zoomLevel)
 				.build();
@@ -188,10 +235,19 @@ public class FinWebContent extends FinInstanceObject {
 		});
 	}
 
+	/**
+	 * Shows the Chromium Developer Tools.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> showDeveloperTools() {
 		return this.finConnection._system.showDeveloperTools(this.identity);
 	}
 
+	/**
+	 * Stops any findInPage call with the provided action.
+	 * @param action Action to execute when stopping a find in page.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> stopFindInPage(FindInPageAction action) {
 		JsonObject payload = Json.createObjectBuilder(FinBeanUtils.toJsonObject(this.identity)).add("action", action.toString())
 				.build();
@@ -202,6 +258,10 @@ public class FinWebContent extends FinInstanceObject {
 		});
 	}
 
+	/**
+	 * Stops any ongoing navigation.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> stopNavigation() {
 		return this.finConnection.sendMessage("stop-window-navigation", FinBeanUtils.toJsonObject(this.identity))
 				.thenAccept(ack -> {
