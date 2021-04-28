@@ -23,7 +23,7 @@ public class TestUtils {
 
 	static {
 		runtimeVersion = System.getProperty("openfin.runtime.version", "stable");
-		String strTimeout = System.getProperty("openfin.runsync.timeout", "20");
+		String strTimeout = System.getProperty("openfin.runsync.timeout", "10");
 		runSyncTimeout = Integer.parseInt(strTimeout);
 	}
 
