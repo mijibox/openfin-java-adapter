@@ -3,6 +3,7 @@ package com.mijibox.openfin;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.UUID;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -12,6 +13,8 @@ import java.util.concurrent.TimeoutException;
 
 import com.mijibox.openfin.FinLauncher;
 import com.mijibox.openfin.FinRuntime;
+import com.mijibox.openfin.bean.ApplicationOptions;
+import com.mijibox.openfin.bean.Identity;
 import com.mijibox.openfin.bean.RuntimeConfig;
 import com.mijibox.openfin.bean.Service;
 
@@ -36,17 +39,35 @@ public class TestUtils {
 	}
 	
 	public static FinRuntime getOpenFinRuntime(String version, boolean enableFdc3) {
+		String connectionUuid = UUID.randomUUID().toString();
+		String startupAppUuid = connectionUuid + "-startup";
+		ApplicationOptions appOpts = new ApplicationOptions(startupAppUuid);
+		appOpts.setUrl("about:blank");
+		
 		RuntimeConfig config = new RuntimeConfig();
 		config.setLicenseKey("JavaUnitTestLicenseKey");
 		config.getRuntime().setArguments("--v=1");
 		config.getRuntime().setVersion(version);
+		config.setStartupApp(appOpts);
+		
 		if (enableFdc3) {
 			config.setServices(new Service("fdc3"));
 		}
 		FinLauncher launcher = FinLauncher.newLauncherBuilder()
+				.connectionUuid(connectionUuid)
 				.runtimeConfig(config)
 				.build();
 		return runSync(launcher.launch(), 180);
+	}
+	
+	public static void dispose(FinRuntime runtime) {
+		String connectionUuid = runtime.getConnectionUuid();
+		String startupAppUuid = connectionUuid + "-startup";
+		runSync(runtime.Application.wrap(new Identity(startupAppUuid)).thenCompose(appObj->{
+			return appObj.terminate().thenCompose(v->{
+				return runtime.disconnect();
+			});
+		}));
 	}
 	
 	public static String getTestManifestUrl(String appName) {

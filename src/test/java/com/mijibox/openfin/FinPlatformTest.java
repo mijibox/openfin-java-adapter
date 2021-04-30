@@ -51,7 +51,7 @@ public class FinPlatformTest {
 
 	@AfterClass
 	public static void teardownAfterClass() throws Exception {
-		TestUtils.runSync(fin.System.exit());
+		TestUtils.dispose(fin);
 	}
 
 	@Test
@@ -313,6 +313,7 @@ public class FinPlatformTest {
 		});
 		
 		TestUtils.runSync(doneTestFuture, 30);
+		TestUtils.runSync(platformObj.quit());
 	}
 	@Test
 	public void replaceLayout() throws Exception {
@@ -400,6 +401,7 @@ public class FinPlatformTest {
 		});
 		
 		TestUtils.runSync(doneTestFuture, 30);
+		TestUtils.runSync(platformObj.quit());
 	}
 	
 	@Test
@@ -420,6 +422,8 @@ public class FinPlatformTest {
 		assertEquals(viewOpts.getUrl(), opts.getUrl());
 		
 		logger.debug("opts: {}", opts);
+		
+		TestUtils.runSync(platformObj.quit());
 		
 	}
 
@@ -463,6 +467,8 @@ public class FinPlatformTest {
 		assertNotNull(opts);
 		assertNotNull(opts.getCustomData());
 		assertEquals(newCustomData, ((JsonString)opts.getCustomData()).getString());
+		
+		TestUtils.runSync(platformObj.quit());
 	}
 
 	@Test
@@ -484,6 +490,7 @@ public class FinPlatformTest {
 		}));
 		
 		TestUtils.runSync(platformObj.closeView(viewObj));
+		TestUtils.runSync(platformObj.quit());
 	}
 
 	@Test
@@ -509,6 +516,7 @@ public class FinPlatformTest {
 		assertNotNull(snapshot.getSnapshotDetails().getRuntimeVersion());
 		logger.debug("snapshot.fromJson: {}", snapshot.getFromJson());
 		logger.debug("snapshot.runtimeVersioin: {}", snapshot.getSnapshotDetails().getRuntimeVersion());
+		TestUtils.runSync(platformObj.quit());
 	}
 
 	@Test
@@ -544,5 +552,6 @@ public class FinPlatformTest {
 		opts.setCloseExistingWindows(true);
 		TestUtils.runSync(platformObj.applySnapshot(snapshot, opts));
 		Thread.sleep(1000);
+		TestUtils.runSync(platformObj.quit());
 	}
 }

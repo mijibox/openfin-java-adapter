@@ -45,7 +45,7 @@ public class FinApplicationTest {
 
 	@AfterClass
 	public static void teardownAfterClass() throws Exception {
-		TestUtils.runSync(fin.System.exit());
+		TestUtils.dispose(fin);
 	}
 
 	@Test

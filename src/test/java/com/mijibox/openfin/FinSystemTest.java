@@ -54,19 +54,19 @@ public class FinSystemTest {
 
 	@AfterClass
 	public static void teardownAfterClass() throws Exception {
-		TestUtils.runSync(fin.System.exit());
+		TestUtils.dispose(fin);
 	}
 
 	@Test
 	public void getVersion() throws Exception {
-		String v = fin.System.getVersion().toCompletableFuture().get(60, TimeUnit.SECONDS);
+		String v = TestUtils.runSync(fin.System.getVersion());
 		logger.info("verson: {}", v);
 		assertNotNull(v);
 	}
 
 	@Test
 	public void getCommandLineArguments() throws Exception {
-		String args = fin.System.getCommandLineArguments().toCompletableFuture().get(60, TimeUnit.SECONDS);
+		String args = TestUtils.runSync(fin.System.getCommandLineArguments());
 		logger.info("command line arguments: {}", args);
 		assertFalse(args.isEmpty());
 	}
@@ -102,9 +102,9 @@ public class FinSystemTest {
 	public void clearCache() throws Exception {
 		ClearCacheOption opts = new ClearCacheOption();
 		opts.setCookies(true);
-		fin.System.clearCache(opts).toCompletableFuture().get(60, TimeUnit.SECONDS);
+		TestUtils.runSync(fin.System.clearCache(opts));
 		
-		fin.System.clearCache(null).toCompletableFuture().get(60, TimeUnit.SECONDS);
+		TestUtils.runSync(fin.System.clearCache(null));
 	}
 	
 	
@@ -193,7 +193,7 @@ public class FinSystemTest {
 	
 	@Test
 	public void getAllApplications() throws Exception {
-		TestUtils.runSync(fin.Application.start(new ApplicationOptions(UUID.randomUUID().toString())));
+		FinApplicationObject appObj = TestUtils.runSync(fin.Application.start(new ApplicationOptions(UUID.randomUUID().toString())));
 		AppInfo[] apps = TestUtils.runSync(fin.System.getAllApplications());
 		assertNotNull(apps);
 		assertTrue(apps.length > 0);
@@ -201,15 +201,17 @@ public class FinSystemTest {
 		for (AppInfo info : apps) {
 			logger.debug("appInfo: {}", info);
 		}
+		TestUtils.runSync(appObj.quit());
 	}
 
 	@Test
 	public void getAllWindows() throws Exception {
-		TestUtils.runSync(fin.Application.start(new ApplicationOptions(UUID.randomUUID().toString())).thenCompose(app->{
-			WindowOptions winOpts = new WindowOptions("childWindowName");
-			winOpts.setUrl("https://www.google.com");
-			return app.createChildWindow(winOpts);
-		}));
+		FinApplicationObject appObj = TestUtils.runSync(fin.Application.start(new ApplicationOptions(UUID.randomUUID().toString())));
+
+		WindowOptions winOpts = new WindowOptions("childWindowName");
+		winOpts.setUrl("https://www.google.com");
+		TestUtils.runSync(appObj.createChildWindow(winOpts));
+		
 		WinInfo[] wins = TestUtils.runSync(fin.System.getAllWindows());
 		assertNotNull(wins);
 		assertTrue(wins.length > 0);
@@ -217,6 +219,7 @@ public class FinSystemTest {
 		for (WinInfo info : wins) {
 			logger.debug("winInfo: {}", info);
 		}
+		TestUtils.runSync(appObj.quit());
 	}
 
 	@Test

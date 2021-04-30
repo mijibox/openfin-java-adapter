@@ -31,7 +31,7 @@ public class FinInterApplicationBusTest {
 
 	@AfterClass
 	public static void teardownAfterClass() throws Exception {
-		TestUtils.runSync(fin.System.exit());
+		TestUtils.dispose(fin);
 	}
 
 	@Test
@@ -158,7 +158,7 @@ public class FinInterApplicationBusTest {
 		latch.await(10, TimeUnit.SECONDS);
 		
 		assertEquals(0, latch.getCount());
-		TestUtils.runSync(fin2.System.exit());
+		TestUtils.dispose(fin2);
 	}
 	
 }

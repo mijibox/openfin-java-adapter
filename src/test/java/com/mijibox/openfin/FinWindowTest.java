@@ -58,7 +58,7 @@ public class FinWindowTest {
 	@AfterClass
 	public static void teardownAfterClass() throws Exception {
 		TestUtils.runSync(ofApplicationObject.quit());
-		TestUtils.runSync(fin.System.exit());
+		TestUtils.dispose(fin);
 	}
 
 	@Before

@@ -35,90 +35,32 @@ public class FinRuntimeTest {
 		assertNotNull(fin.System);
 		assertNotNull(fin.View);
 		assertNotNull(fin.Window);
-		TestUtils.runSync(fin.System.exit());
-	}
-	
-	@Test
-	public void multiThread() throws Exception {
-		FinRuntime fin = TestUtils.getOpenFinRuntime();
-		
-		try {
-			int threadCount = 50;
-			CompletableFuture<?>[] futures = new CompletableFuture<?>[threadCount] ;
-			for (int i=0; i<threadCount; i++) {
-				futures[i] = fin.System.getRuntimeInfo().thenAccept(info->{
-					logger.debug("runtime info: {}", info.getFromJson());
-				}).toCompletableFuture();
-			}
-			CompletableFuture.allOf(futures);
-		}
-		finally {
-			TestUtils.runSync(fin.System.exit());
-		}
-	}
-
-	@Test
-	public void multiThreadWait() throws Exception {
-		FinRuntime fin = TestUtils.getOpenFinRuntime();
-		
-		try {
-			int threadCount = 50;
-			for (int i=0; i<threadCount; i++) {
-				TestUtils.runSync(fin.System.getRuntimeInfo().thenAccept(info->{
-					logger.debug("runtime info: {}", info.getFromJson());
-				}));
-			}
-		}
-		finally {
-			TestUtils.runSync(fin.System.exit());
-		}
-	}
-
-	@Test
-	public void multiThreadChain() throws Exception {
-		FinRuntime fin = TestUtils.getOpenFinRuntime();
-		
-		try {
-			int threadCount = 50;
-			CompletionStage<?> future = null;
-			for (int i=0; i<threadCount; i++) {
-				if (future == null) {
-					future = fin.System.getRuntimeInfo().thenAccept(info->{
-						logger.debug("runtime info: {}", info.getFromJson());
-					});
-				}
-				else {
-					future = future.thenCompose(v->{
-						return fin.System.getRuntimeInfo().thenAccept(info->{
-							logger.debug("runtime info: {}", info.getFromJson());
-						});
-					});
-				}
-			}
-			TestUtils.runSync(future);
-		}
-		finally {
-			TestUtils.runSync(fin.System.exit());
-		}
+		TestUtils.dispose(fin);
 	}
 	
 	@Test
 	public void multipleConnections() throws Exception {
+		Thread.sleep(5000);
 		int cnt = 20;
-		String[] versions = {"stable", "stable-v18", "stable-v17", "stable-v16", "stable-v15"};
+		String[] versions = { "stable", "stable-v18", "stable-v17", "stable-v16", "stable-v15" };
+		ExecutorService threadPool = Executors.newCachedThreadPool();
 		CountDownLatch latch = new CountDownLatch(cnt);
-		for (int i=0; i<cnt; i++) {
+		for (int i = 0; i < cnt; i++) {
+			Thread.sleep(100);
 			int index = i;
-			FinLauncher.newLauncherBuilder()
-				.runtimeVersion(versions[index%versions.length])
-				.build().launch().thenComposeAsync(runtime->{
-				return runtime.System.getVersion().thenAccept(v->{
-					logger.debug("runtime: {}, version: {}", runtime.getConnectionUuid(), v);
-					latch.countDown();
-				});
-			});
+			CompletableFuture.runAsync(() -> {
+				FinLauncher.newLauncherBuilder()
+						.runtimeVersion(versions[index % versions.length])
+						.build().launch().thenComposeAsync(runtime -> {
+							return runtime.System.getVersion().thenAccept(v -> {
+								logger.debug("runtime: {}, version: {}", runtime.getConnectionUuid(), v);
+								latch.countDown();
+								runtime.disconnect();
+							});
+						});
+			}, threadPool);
 		}
-		
+
 		latch.await(30, TimeUnit.SECONDS);
 		assertEquals(0, latch.getCount());
 	}

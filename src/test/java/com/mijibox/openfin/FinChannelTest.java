@@ -49,7 +49,7 @@ public class FinChannelTest {
 
 	@AfterClass
 	public static void teardownAfterClass() throws Exception {
-		TestUtils.runSync(fin.System.exit());
+		TestUtils.dispose(fin);
 	}
 
 	@Test
@@ -156,7 +156,6 @@ public class FinChannelTest {
 	@Test
 	public void disconnect() throws Exception {
 		String channelName = UUID.randomUUID().toString();
-
 		FinChannelProvider provider = TestUtils.runSync(fin.Channel.create(channelName));
 		logger.info("providerIdentity: {}", FinBeanUtils.toJsonString(provider.getProviderIdentity()));
 		assertNotNull(provider.getProviderIdentity());
@@ -485,7 +484,9 @@ public class FinChannelTest {
 		fin.Application.start(appOpts).thenAccept(appObj->{
 			fin.Channel.create(channelName).thenAccept(provider->{
 				provider.addClientConnectListener(e->{
-					clientConnectedFuture.complete(null);
+					appObj.quit().thenAccept(v->{
+						clientConnectedFuture.complete(null);
+					});
 				});
 				
 				clientConnectedFuture.thenAccept(v->{

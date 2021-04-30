@@ -30,6 +30,7 @@ import com.mijibox.openfin.FinRuntimeLauncherBuilder;
 import com.mijibox.openfin.FinRvmLauncher;
 import com.mijibox.openfin.FinRvmLauncherBuilder;
 import com.mijibox.openfin.bean.ApplicationOptions;
+import com.mijibox.openfin.bean.Identity;
 import com.mijibox.openfin.bean.RuntimeConfig;
 import com.sun.jna.Platform;
 
@@ -108,7 +109,7 @@ public class FinRuntimeLauncherTest {
 		FinRvmLauncher launcher = new FinRvmLauncher(new FinRvmLauncherBuilder());
 		FinRuntime runtime = TestUtils.runSync(launcher.launch());
 		assertNotNull(runtime);
-		TestUtils.runSync(runtime.System.exit());
+		TestUtils.runSync(runtime.disconnect());
 		Thread.sleep(2000);
 	}
 	
@@ -118,7 +119,7 @@ public class FinRuntimeLauncherTest {
 		FinRuntimeLauncher launcher = new FinRuntimeLauncher(builder);
 		FinRuntime runtime = TestUtils.runSync(launcher.launch());
 		assertNotNull(runtime);
-		TestUtils.runSync(runtime.System.exit());
+		TestUtils.runSync(runtime.disconnect());
 		Thread.sleep(2000);
 	}
 
@@ -127,7 +128,7 @@ public class FinRuntimeLauncherTest {
 		FinLauncher launcher = FinLauncher.newLauncherBuilder().build();
 		FinRuntime runtime = TestUtils.runSync(launcher.launch());
 		assertNotNull(runtime);
-		TestUtils.runSync(runtime.System.exit());
+		TestUtils.runSync(runtime.disconnect());
 		Thread.sleep(2000);
 	}
 	
@@ -147,7 +148,7 @@ public class FinRuntimeLauncherTest {
 			}
 		}).build();
 
-		FinRuntime runtime = TestUtils.runSync(launcher.launch());
+		TestUtils.runSync(launcher.launch());
 		
 		latch.await(10, TimeUnit.SECONDS);
 		
@@ -183,7 +184,7 @@ public class FinRuntimeLauncherTest {
 		
 		assertNotNull(runtime1);
 		assertNull(runtime2);
-		TestUtils.runSync(runtime1.System.exit());
+		TestUtils.runSync(runtime1.disconnect());
 		Thread.sleep(2000);
 	}
 	
@@ -228,7 +229,8 @@ public class FinRuntimeLauncherTest {
 	
 	@Test
 	public void localHtml() throws Exception {
-		ApplicationOptions startupApp = new ApplicationOptions(UUID.randomUUID().toString());
+		String appUuid = UUID.randomUUID().toString();
+		ApplicationOptions startupApp = new ApplicationOptions(appUuid);
 		startupApp.setUrl(TestUtils.getTestHtmlUrl("echo"));
 		startupApp.setAutoShow(true);
 		RuntimeConfig config = new RuntimeConfig();
@@ -238,24 +240,26 @@ public class FinRuntimeLauncherTest {
 
 		Thread.sleep(2000);
 		
-		TestUtils.runSync(fin.System.exit());
+		TestUtils.runSync(fin.Application.wrap(new Identity(appUuid)).thenCompose(appObj->{
+			return appObj.quit();
+		}));
 		Thread.sleep(2000);
 	}
 	
 	@Test
 	public void localManifest() throws Exception {
-		FinRuntime fin = TestUtils.runSync(FinLauncher.newLauncherBuilder().build().launch());
+		FinRuntime fin = TestUtils.getOpenFinRuntime();
 		FinApplicationObject app = TestUtils.runSync(fin.Application.startFromManifest(TestUtils.getTestManifestUrl("google")));
 		TestUtils.runSync(app.getWindow().thenAccept(winObj->{
 			winObj.close();
 		}));
-		TestUtils.runSync(fin.System.exit());
+		TestUtils.dispose(fin);
 		Thread.sleep(2000);
 	}
 	
 	@Test
 	public void skipPortDiscovery() throws Exception {
-		FinRuntime runtime = TestUtils.runSync(new FinRvmLauncherBuilder().build().launch()); //start a runtime process, if 9696 is not already taken, then this one will take the default port
+		FinRuntime runtime = TestUtils.getOpenFinRuntime(); //start a runtime process, if 9696 is not already taken, then this one will take the default port
 		assertNotNull(runtime);
 		FinRuntime runtime1 = TestUtils.runSync(new FinRvmLauncherBuilder().runtimePort(9696).build().launch()); 
 		assertNotNull(runtime1);
@@ -264,7 +268,7 @@ public class FinRuntimeLauncherTest {
 		FinRuntime runtime2 = TestUtils.runSync(new FinRuntimeLauncherBuilder().runtimePort(9696).build().launch()); 
 		assertNotNull(runtime2);
 		TestUtils.runSync(runtime2.disconnect());
-		TestUtils.runSync(runtime.disconnect());
+		TestUtils.dispose(runtime);
 	}
 
 	@Test
@@ -276,6 +280,7 @@ public class FinRuntimeLauncherTest {
 		TestUtils.runSync(runtime.disconnect());
 		Thread.sleep(1000);
 		FinRuntime runtime2 = TestUtils.runSync(new FinRuntimeLauncherBuilder().runtimeVersion(requestedVersion).build().launch());
+		TestUtils.runSync(runtime2.disconnect());
 		assertNotNull(runtime2);
 		assertEquals(requestedVersion, runtime2.getVersion());
 	}
