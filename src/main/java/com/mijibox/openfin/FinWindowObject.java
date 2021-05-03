@@ -106,7 +106,7 @@ public class FinWindowObject extends FinWebContent {
 
 	/**
 	 * Removes focus from the window.
-	 * @return
+	 * @return A new CompletionStage for the task.
 	 */
 	public CompletionStage<Void> blur() {
 		return this.finConnection.sendMessage("blur-window", FinBeanUtils.toJsonObject(this.identity))
@@ -119,7 +119,7 @@ public class FinWindowObject extends FinWebContent {
 
 	/**
 	 * Brings the window to the front of the window stack.
-	 * @return
+	 * @return A new CompletionStage for the task.
 	 */
 	public CompletionStage<Void> bringToFront() {
 		return this.finConnection.sendMessage("bring-window-to-front", FinBeanUtils.toJsonObject(this.identity))
@@ -132,7 +132,7 @@ public class FinWindowObject extends FinWebContent {
 
 	/**
 	 * Centers the window on its current screen.
-	 * @return
+	 * @return A new CompletionStage for the task.
 	 */
 	public CompletionStage<Void> center() {
 		return this.finConnection.sendMessage("center-window", FinBeanUtils.toJsonObject(this.identity))
@@ -143,6 +143,10 @@ public class FinWindowObject extends FinWebContent {
 				});
 	}
 
+	/**
+	 * Flashes the window’s frame and taskbar icon until stopFlashing is called or until a focus event is fired.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> flash() {
 		return this.finConnection.sendMessage("flash-window", FinBeanUtils.toJsonObject(this.identity))
 				.thenAccept(ack -> {
@@ -152,6 +156,10 @@ public class FinWindowObject extends FinWebContent {
 				});
 	}
 
+	/**
+	 * Stops the taskbar icon from flashing.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> stopFlashing() {
 		return this.finConnection.sendMessage("stop-flash-window", FinBeanUtils.toJsonObject(this.identity))
 				.thenAccept(ack -> {
@@ -162,13 +170,18 @@ public class FinWindowObject extends FinWebContent {
 	}
 
 	/**
-	 * closes the window application.
-	 * @return
+	 * Closes the window.
+	 * @return A new CompletionStage for the task.
 	 */
 	public CompletionStage<Void> close() {
 		return this.close(null);
 	}
 
+	/**
+	 * Closes the window.
+	 * @param force Close will be prevented from closing when force is false and ‘close-requested’ has been subscribed.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> close(Boolean force) {
 		JsonObjectBuilder builder = Json.createObjectBuilder(FinBeanUtils.toJsonObject(this.identity));
 		if (force != null) {
@@ -181,6 +194,10 @@ public class FinWindowObject extends FinWebContent {
 		});
 	}
 
+	/**
+	 * Hides the window.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> hide() {
 		return this.finConnection.sendMessage("hide-window", FinBeanUtils.toJsonObject(this.identity)).thenAccept(ack -> {
 			if (!ack.isSuccess()) {
@@ -190,10 +207,19 @@ public class FinWindowObject extends FinWebContent {
 	}
 
 
+	/**
+	 * Shows the window if it is hidden.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> show() {
 		return this.show(null);
 	}
 
+	/**
+	 * Shows the window if it is hidden.
+	 * @param force Show will be prevented from showing when force is false and ‘show-requested’ has been subscribed.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> show(Boolean force) {
 		JsonObjectBuilder builder = Json.createObjectBuilder(FinBeanUtils.toJsonObject(this.identity));
 		if (force != null) {
@@ -206,6 +232,10 @@ public class FinWindowObject extends FinWebContent {
 		});
 	}
 
+	/**
+	 * Returns the native OS level Id. In Windows, it will return the Windows handle.
+	 * @return A new CompletionStage for the native ID of the window.
+	 */
 	public CompletionStage<String> getNativeId() {
 		return this.finConnection.sendMessage("get-window-native-id", FinBeanUtils.toJsonObject(this.identity)).thenApply(ack -> {
 			if (!ack.isSuccess()) {
@@ -217,6 +247,10 @@ public class FinWindowObject extends FinWebContent {
 		});
 	}
 
+	/**
+	 * Gets the current settings of the window.
+	 * @return A new CompletionStage for the settings of the window.
+	 */
 	public CompletionStage<WindowOptions> getOptions() {
 		return this.finConnection.sendMessage("get-window-options", FinBeanUtils.toJsonObject(this.identity)).thenApply(ack -> {
 			if (!ack.isSuccess()) {
@@ -227,11 +261,19 @@ public class FinWindowObject extends FinWebContent {
 			}
 		});
 	}
-	
+
+	/**
+	 * Retrieves the window's Layout.
+	 * @return A new CompletionStage for the layout of the window.
+	 */
 	public CompletionStage<FinLayoutObject> getLayout() {
 		return this.finConnection._layout.wrap(this.identity);
 	}
 
+	/**
+	 * Prevents a user from changing a window's size/position when using the window's frame.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> disableUserMovement() {
 		return this.finConnection.sendMessage("disable-window-frame", FinBeanUtils.toJsonObject(this.identity)).thenAccept(ack -> {
 			if (!ack.isSuccess()) {
@@ -240,6 +282,10 @@ public class FinWindowObject extends FinWebContent {
 		});
 	}
 
+	/**
+	 * Re-enables user changes to a window's size/position when using the window's frame.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> enableUserMovement() {
 		return this.finConnection.sendMessage("enable-window-frame", FinBeanUtils.toJsonObject(this.identity)).thenAccept(ack -> {
 			if (!ack.isSuccess()) {
@@ -248,6 +294,10 @@ public class FinWindowObject extends FinWebContent {
 		});
 	}
 
+	/**
+	 * Retrieves an array of frame info objects representing the main frame and any iframes that are currently on the page.
+	 * @return A new CompletionStage for the array of frame information objects.
+	 */
 	public CompletionStage<FrameInfo[]> getAllFrames() {
 		return this.finConnection.sendMessage("get-all-frames", FinBeanUtils.toJsonObject(this.identity)).thenApply(ack -> {
 			if (!ack.isSuccess()) {
@@ -264,6 +314,10 @@ public class FinWindowObject extends FinWebContent {
 		});
 	}
 	
+	/**
+	 * Gets the current bounds of the window.
+	 * @return A new CompletionStage for the bounds of the window.
+	 */
 	public CompletionStage<WindowBounds> getBounds() {
 		return this.finConnection.sendMessage("get-window-bounds", FinBeanUtils.toJsonObject(this.identity)).thenApply(ack -> {
 			if (!ack.isSuccess()) {
@@ -275,6 +329,10 @@ public class FinWindowObject extends FinWebContent {
 		});
 	}
 
+	/**
+	 * Retrieves an array containing window objects that are grouped with this window.
+	 * @return A new CompletionStage for the array of the window objects.
+	 */
 	public CompletionStage<FinWindowObject[]> getGroup() {
 		return this.finConnection.sendMessage("get-window-group", Json.createObjectBuilder(FinBeanUtils.toJsonObject(this.identity)).add("crossApp", true).build()).thenApply(ack -> {
 			if (!ack.isSuccess()) {
@@ -302,6 +360,10 @@ public class FinWindowObject extends FinWebContent {
 		});
 	}
 
+	/**
+	 * Gets an information object for the window.
+	 * @return A new CompletionStage for the information object of the window.
+	 */
 	public CompletionStage<WindowInfo> getInfo() {
 		return this.finConnection.sendMessage("get-window-info", FinBeanUtils.toJsonObject(this.identity)).thenApply(ack -> {
 			if (!ack.isSuccess()) {
@@ -313,10 +375,18 @@ public class FinWindowObject extends FinWebContent {
 		});
 	}
 	
+	/**
+	 * Gets the parent application.
+	 * @return A new CompletionStage of the parent application.
+	 */
 	public CompletionStage<FinApplicationObject> getParentApplication() {
 		return this.finConnection._application.wrap(new Identity(this.getIdentity().getUuid()));
 	}
 
+	/**
+	 * Gets the current state of the window.
+	 * @return The state of the window ("minimized", "maximized", or "restored"). 
+	 */
 	public CompletionStage<String> getState() {
 		return this.finConnection.sendMessage("get-window-state", FinBeanUtils.toJsonObject(this.identity)).thenApply(ack -> {
 			if (!ack.isSuccess()) {
@@ -328,10 +398,18 @@ public class FinWindowObject extends FinWebContent {
 		});
 	}
 	
+	/**
+	 * Determines if the window is a main window.
+	 * @return true if the window is the main window of an application.
+	 */
 	public boolean isMainWindow() {
 		return Objects.equals(this.identity.getUuid(), this.identity.getName());
 	}
 	
+	/**
+	 * Determines if the window is currently showing.
+	 * @return A new CompletionStage of the visibility of the window.
+	 */
 	public CompletionStage<Boolean> isShowing() {
 		return this.finConnection.sendMessage("is-window-showing", FinBeanUtils.toJsonObject(this.identity)).thenApply(ack -> {
 			if (!ack.isSuccess()) {
@@ -343,6 +421,11 @@ public class FinWindowObject extends FinWebContent {
 		});
 	}
 	
+	/**
+	 * Joins the same window group as the specified window. 
+	 * @param target The window whose group is to be joined.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> joinGroup(FinWindowObject target) {
 		JsonObject payload = Json.createObjectBuilder(FinBeanUtils.toJsonObject(this.identity))
 				.add("groupingUuid", target.getIdentity().getUuid()).add("groupingWindowName", target.getIdentity().getName()).build();
@@ -353,6 +436,11 @@ public class FinWindowObject extends FinWebContent {
 		});
 	}
 	
+	/**
+	 * Merges the instance's window group with the same window group as the specified window
+	 * @param target The window whose group is to be merged with.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> mergeGroups(FinWindowObject target) {
 		JsonObject payload = Json.createObjectBuilder(FinBeanUtils.toJsonObject(this.identity))
 				.add("groupingUuid", target.getIdentity().getUuid()).add("groupingWindowName", target.getIdentity().getName()).build();
@@ -363,6 +451,10 @@ public class FinWindowObject extends FinWebContent {
 		});
 	}
 	
+	/**
+	 * Leaves the current window group so that the window can be move independently of those in the group.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> leaveGroup() {
 		return this.finConnection.sendMessage("leave-window-group", FinBeanUtils.toJsonObject(this.identity)).thenAccept(ack -> {
 			if (!ack.isSuccess()) {
@@ -371,6 +463,10 @@ public class FinWindowObject extends FinWebContent {
 		});
 	}
 	
+	/**
+	 * Maximizes the window.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> maximize() {
 		return this.finConnection.sendMessage("maximize-window", FinBeanUtils.toJsonObject(this.identity)).thenAccept(ack -> {
 			if (!ack.isSuccess()) {
@@ -379,6 +475,10 @@ public class FinWindowObject extends FinWebContent {
 		});
 	}
 	
+	/**
+	 * Minimizes the window.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> minimize() {
 		return this.finConnection.sendMessage("minimize-window", FinBeanUtils.toJsonObject(this.identity)).thenAccept(ack -> {
 			if (!ack.isSuccess()) {
@@ -387,6 +487,10 @@ public class FinWindowObject extends FinWebContent {
 		});
 	}
 	
+	/**
+	 * Restores the window to its normal state.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> restore() {
 		return this.finConnection.sendMessage("restore-window", FinBeanUtils.toJsonObject(this.identity)).thenAccept(ack -> {
 			if (!ack.isSuccess()) {
@@ -395,6 +499,12 @@ public class FinWindowObject extends FinWebContent {
 		});
 	}
 	
+	/**
+	 * Moves the window by a specified amount. 
+	 * @param deltaX The change in the X coordinate of the new location.
+	 * @param deltaY The change in the Y coordinate of the new location.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> moveBy(int deltaX, int deltaY) {
 		JsonObject payload = Json.createObjectBuilder(FinBeanUtils.toJsonObject(this.identity)).add("deltaLeft", deltaX).add("deltaTop", deltaY).build();
 		return this.finConnection.sendMessage("move-window-by", payload).thenAccept(ack -> {
@@ -403,7 +513,13 @@ public class FinWindowObject extends FinWebContent {
 			}
 		});
 	}
-	
+
+	/**
+	 * Moves the window to a specified location.
+	 * @param x The X coordinate of the new location.
+	 * @param y The Y coordinate of the new location
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> moveTo(int x, int y) {
 		JsonObject payload = Json.createObjectBuilder(FinBeanUtils.toJsonObject(this.identity)).add("left", x).add("top", y).build();
 		return this.finConnection.sendMessage("move-window", payload).thenAccept(ack -> {
@@ -413,10 +529,23 @@ public class FinWindowObject extends FinWebContent {
 		});
 	}
 	
+	/**
+	 * Resizes the window by a specified amount.
+	 * @param deltaWidth The change in the width of the window.
+	 * @param deltaHeight The change in the height of the window.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> resizeBy(int deltaWidth, int deltaHeight) {
 		return this.resizeBy(deltaWidth, deltaHeight, Anchor.TOP_LEFT);
 	}
 
+	/**
+	 * Resizes the window by a specified amount.
+	 * @param deltaWidth The change in the width of the window.
+	 * @param deltaHeight The change in the height of the window.
+	 * @param anchor Specifies a corner to remain fixed during the resize.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> resizeBy(int deltaWidth, int deltaHeight, Anchor anchor) {
 		JsonObject payload = Json.createObjectBuilder(FinBeanUtils.toJsonObject(this.identity))
 				.add("deltaWidth", deltaWidth).add("deltaHeight", deltaHeight)
@@ -428,10 +557,23 @@ public class FinWindowObject extends FinWebContent {
 		});
 	}
 
+	/**
+	 * Resizes the window to the specified dimensions.
+	 * @param width The new width of the window.
+	 * @param height The new height of the window.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> resizeTo(int width, int height) {
 		return this.resizeTo(width, height, Anchor.TOP_LEFT);
 	}
 
+	/**
+	 * Resizes the window to the specified dimensions.
+	 * @param width The new width of the window.
+	 * @param height The new height of the window.
+	 * @param anchor Specifies a corner to remain fixed during the resize. 
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> resizeTo(int width, int height, Anchor anchor) {
 		JsonObject payload = Json.createObjectBuilder(FinBeanUtils.toJsonObject(this.identity))
 				.add("width", width).add("height", height)
@@ -443,6 +585,10 @@ public class FinWindowObject extends FinWebContent {
 		});
 	}
 
+	/**
+	 * Brings the window to the front of the entire stack and gives it focus.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> setAsForeground() {
 		JsonObject payload = Json.createObjectBuilder(FinBeanUtils.toJsonObject(this.identity))
 				.build();
@@ -453,6 +599,11 @@ public class FinWindowObject extends FinWebContent {
 		});
 	}
 	
+	/**
+	 * Sets the window's size and position.
+	 * @param newBounds The new size and position.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> setBounds(Bounds newBounds) {
 		JsonObjectBuilder builder = Json.createObjectBuilder(FinBeanUtils.toJsonObject(this.identity));
 		if (newBounds.getTop() != null) {
@@ -474,10 +625,23 @@ public class FinWindowObject extends FinWebContent {
 		});
 	}
 
+	/**
+	 * Show the window at specified location.
+	 * @param left The left position of the window.
+	 * @param top The top position of the window.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> showAt(int left, int top) {
 		return this.showAt(left, top, null);
 	}
 	
+	/**
+	 * Show the window at specified location.
+	 * @param left The left position of the window.
+	 * @param top The top position of the window.
+	 * @param force The window will be prevented from showing when force is false and ‘show-requested’ has been subscribed.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> showAt(int left, int top, Boolean force) {
 		JsonObjectBuilder builder = Json.createObjectBuilder(FinBeanUtils.toJsonObject(this.identity)).add("left", left).add("top", top);
 		if (force != null) {
@@ -490,6 +654,11 @@ public class FinWindowObject extends FinWebContent {
 		});
 	}
 	
+	/**
+	 * Updates the window using the passed options.
+	 * @param options The options to update.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> updateOptions(WindowUpdatableOptions options) {
 		JsonObject payload = Json.createObjectBuilder(FinBeanUtils.toJsonObject(this.identity)).add("options", FinBeanUtils.toJsonObject(options)).build();
 		return this.finConnection.sendMessage("update-window-options", payload).thenAccept(ack -> {
