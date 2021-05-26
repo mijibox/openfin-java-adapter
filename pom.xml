@@ -13,9 +13,17 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>https://raw.githubusercontent.com/mijibox/openfin-java-adapter/master/LICENSE</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
 	<developers>
 		<developer>
-			<id>anthony</id>
+			<id>anthonywtho</id>
 			<name>Anthony Ho</name>
 			<email>anthony@mijibox.com</email>
 			<organization>MIJI Technology LLC</organization>
