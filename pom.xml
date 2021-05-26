@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.mijibox.openfin</groupId>
 	<artifactId>openfin-java-adapter</artifactId>
-	<version>1.1-SNAPSHOT</version>
+	<version>1.1</version>
 
 	<name>openfin-java-adapter</name>
 	<description>OpenFin Java Adapter</description>
@@ -26,7 +26,7 @@
 		<connection>scm:git:https://github.com/mijibox/openfin-java-adapter.git</connection>
 		<developerConnection>scm:git:https://github.com/mijibox/openfin-java-adapter.git</developerConnection>
 		<url>https://github.com/mijibox/openfin-java-adapter</url>
-		<tag>HEAD</tag>
+		<tag>openfin-java-adapter-1.1</tag>
 	</scm>
 
 	<dependencies>
