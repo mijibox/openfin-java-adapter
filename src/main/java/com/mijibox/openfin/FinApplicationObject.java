@@ -111,22 +111,28 @@ public class FinApplicationObject extends FinInstanceObject {
 	}
 
 	/**
-	 * Adds a listener to the end of the listeners array for the specified event.
-	 * @param eventType
-	 * @param listener
-	 * @return
+	 * Adds a listener to the end of the listener list for the specified event.
+	 * @param eventType The type of the event.
+	 * @param listener The listener to be added.
+	 * @return new CompletionStage of the result in boolean, true if the listener is appended at the end of the listener list.
 	 */
 	public CompletionStage<Boolean> addEventListener(String eventType, FinEventListener listener) {
 		return this.finConnection._subscriptionManager.addListener(this.identity, "application", eventType, listener);
 	}
 	
+	/**
+	 * Removes the listener from the listener list.
+	 * @param eventType The type of the event.
+	 * @param listener The listener to be removed.
+	 * @return new CompletionStage of the result in boolean, true if the listener is removed from the listener list.
+	 */
 	public CompletionStage<Boolean> removeEventListener(String eventType, FinEventListener listener) {
 		return  this.finConnection._subscriptionManager.removeListener(this.identity, "application", eventType, listener);
 	}
 	
 	/**
 	 * Determines if the application is currently running.
-	 * @return
+	 * @return new CompletionStage of the result in boolean.
 	 */
 	public CompletionStage<Boolean> isRunning() {
 		return this.finConnection.sendMessage("is-application-running", FinBeanUtils.toJsonObject(identity)).thenApply(ack ->{
@@ -145,14 +151,18 @@ public class FinApplicationObject extends FinInstanceObject {
 		});
 	}
 	
+	/**
+	 * Closes the application and any child windows created by the application.
+	 * @return new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> quit() {
 		return this.quit(null);
 	}
 	
 	/**
 	 * Closes the application and any child windows created by the application.
-	 * @param force
-	 * @return
+	 * @param force Close will be prevented from closing when force is false and ‘close-requested’ has been subscribed to for application’s main window.
+	 * @return new CompletionStage for the task.
 	 */
 	public CompletionStage<Void> quit(Boolean force) {
 		JsonObjectBuilder builder = Json.createObjectBuilder(FinBeanUtils.toJsonObject(identity));
@@ -168,6 +178,10 @@ public class FinApplicationObject extends FinInstanceObject {
 		});
 	}
 
+	/**
+	 * Closes the application by terminating its process.
+	 * @return new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> terminate() {
 		return this.finConnection.sendMessage("terminate-application", FinBeanUtils.toJsonObject(identity)).thenAccept(ack ->{
 			if (!ack.isSuccess()) {
@@ -178,7 +192,7 @@ public class FinApplicationObject extends FinInstanceObject {
 
 	/**
 	 * Retrieves information about the application.
-	 * @return
+	 * @return new CompletionStage of the application info.
 	 */
 	public CompletionStage<ApplicationInfo> getInfo() {
 		return this.finConnection.sendMessage("get-info", FinBeanUtils.toJsonObject(identity)).thenApply(ack ->{
@@ -193,7 +207,7 @@ public class FinApplicationObject extends FinInstanceObject {
 	
 	/**
 	 * Retrieves a list of wrapped OfWindowObject for each of the application’s child windows.
-	 * @return
+	 * @return new CompletionStage of the list of child windows.
 	 */
 	public CompletionStage<List<FinWindowObject>> getChildWindows() {
 		return this.finConnection.sendMessage("get-child-windows", FinBeanUtils.toJsonObject(this.identity)).thenApply(ack ->{
@@ -220,7 +234,7 @@ public class FinApplicationObject extends FinInstanceObject {
 	}
 	/**
 	 * Returns an instance of the main Window of the application
-	 * @return
+	 * @return new CompletionStage of the main window.
 	 */
 	public CompletionStage<FinWindowObject> getWindow() {
 		String uuid = this.identity.getUuid();
@@ -229,7 +243,7 @@ public class FinApplicationObject extends FinInstanceObject {
 	
 	/**
 	 * Retrieves an list of active window groups for all of the application's windows. Each group is represented as a list of wrapped OfWindowObject.
-	 * @return
+	 * @return new CompletionStage of the list of lists of window objects that are in the same group.
 	 */
 	public CompletionStage<List<List<FinWindowObject>>> getGroups() {
 		JsonObject payload = Json.createObjectBuilder(FinBeanUtils.toJsonObject(this.identity)).add("crossApp", true).build();
@@ -262,7 +276,7 @@ public class FinApplicationObject extends FinInstanceObject {
 	
 	/**
 	 * Retrieves the JSON manifest that was used to create the application. Throws RuntimeException if the application was not created from a manifest.
-	 * @return
+	 * @return new CompletionStage of the application manifest.
 	 */
 	public CompletionStage<JsonObject> getManifest() {
 		return this.finConnection.sendMessage("get-application-manifest", FinBeanUtils.toJsonObject(identity)).thenApply(ack->{
@@ -277,7 +291,7 @@ public class FinApplicationObject extends FinInstanceObject {
 	
 	/**
 	 * Retrieves UUID of the application that launches this application. Throws RuntimeException if the application was created from a manifest.
-	 * @return
+	 * @return new CompletionStage of the UUID of the parent application.
 	 */
 	public CompletionStage<String> getParentUuid() {
 		return this.finConnection.sendMessage("get-parent-application", FinBeanUtils.toJsonObject(identity)).thenApply(ack->{
@@ -290,6 +304,11 @@ public class FinApplicationObject extends FinInstanceObject {
 		});
 	}
 	
+	/**
+	 * Creates a new child window of this application.
+	 * @param winOpts options to create the child window.
+	 * @return new CompletionStage of the new child window.
+	 */
 	public CompletionStage<FinWindowObject> createChildWindow(WindowOptions winOpts) {
 		CompletableFuture<FinWindowObject> childWinFuture = new CompletableFuture<>();
 		JsonObject payload = Json.createObjectBuilder().add("targetUuid", this.identity.getUuid()).add("windowOptions", FinBeanUtils.toJsonObject(winOpts)).build();
@@ -308,6 +327,12 @@ public class FinApplicationObject extends FinInstanceObject {
 		return childWinFuture;
 	}
 	
+	/**
+	 * Manually registers a user with the licensing service.
+	 * @param userName the user name to be registered with the licensing service.
+	 * @param appName the app name to be registered with the licensing service.
+	 * @return new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> registerUser(String userName, String appName) {
 		JsonObject payload = Json.createObjectBuilder(FinBeanUtils.toJsonObject(identity))
 				.add("userName", userName)
@@ -319,6 +344,10 @@ public class FinApplicationObject extends FinInstanceObject {
 		});
 	}
 	
+	/**
+	 * Retrieves current application's shortcut configuration.
+	 * @return new CompletionStage of the shortcut information.
+	 */
 	public CompletionStage<ShortCutConfig> getShortCuts() {
 		return this.finConnection.sendMessage("get-shortcuts", FinBeanUtils.toJsonObject(this.identity)).thenApply(ack->{
 			if (ack.isSuccess()) {
@@ -330,6 +359,11 @@ public class FinApplicationObject extends FinInstanceObject {
 		});
 	}
 	
+	/**
+	 * Adds a customizable icon in the system tray. To listen for a click on the icon use the tray-icon-clicked event.
+	 * @param icon Image URL or base64 encoded string to be used as the icon
+	 * @return new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> setTrayIcon(String icon) {
 		return this.finConnection.sendMessage("set-tray-icon", Json.createObjectBuilder(FinBeanUtils.toJsonObject(this.identity)).add("enabledIcon", icon).build()).thenAccept(ack->{
 			if (!ack.isSuccess()) {
@@ -338,6 +372,10 @@ public class FinApplicationObject extends FinInstanceObject {
 		});
 	}
 	
+	/**
+	 * Retrieves information about the system tray.
+	 * @return A new CompletionStage for the tray icon info.
+	 */
 	public CompletionStage<TrayIconInfo> getTrayIconInfo() {
 		return this.finConnection.sendMessage("get-tray-icon-info", FinBeanUtils.toJsonObject(this.identity)).thenApply(ack->{
 			if (ack.isSuccess()) {
@@ -351,7 +389,7 @@ public class FinApplicationObject extends FinInstanceObject {
 	
 	/**
 	 * Returns the current zoom level of the application.
-	 * @return
+	 * @return A new CompletionStage for the task.
 	 */
 	public CompletionStage<Integer> getZoomLevel() {
 		return this.finConnection.sendMessage("get-application-zoom-level", FinBeanUtils.toJsonObject(this.identity)).thenApply(ack->{
@@ -364,6 +402,14 @@ public class FinApplicationObject extends FinInstanceObject {
 		});
 	}
 	
+	/**
+	 * Sets the zoom level of the application. The original size is 0 and each
+	 * increment above or below represents zooming 20% larger or smaller to default
+	 * limits of 300% and 50% of original size, respectively.
+	 * 
+	 * @param zoomLevel The zoom level.
+	 * @return A new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> setZoomLevel(int zoomLevel) {
 		JsonObject payload = Json.createObjectBuilder(FinBeanUtils.toJsonObject(identity))
 				.add("level", zoomLevel).build();
