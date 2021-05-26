@@ -92,7 +92,7 @@ public class FinRuntime {
 	
 	/**
 	 * Get the executor that's used for asynchronous calls.
-	 * @return
+	 * @return The executor.
 	 */
 	public Executor getExecutor() {
 		return this.finConnection.executor;

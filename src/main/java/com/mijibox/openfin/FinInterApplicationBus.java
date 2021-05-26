@@ -79,10 +79,10 @@ public class FinInterApplicationBus extends FinApiObject {
 
 	/**
 	 * Subscribes to messages from the specified application on the specified topic.
-	 * @param source Source identity
+	 * @param identity Source identity
 	 * @param topic The topic on which the message is sent
 	 * @param listener The listener that is called when a message has been received
-	 * @return the new CompletionStage
+	 * @return new CompletionStage for the task. 
 	 */
 	public CompletionStage<Void> subscribe(Identity identity, String topic, FinIabMessageListener listener) {
 		Identity source = identity == null ? new Identity() : identity;
@@ -125,7 +125,7 @@ public class FinInterApplicationBus extends FinApiObject {
 
 	/**
 	 * Unsubscribes to messages from the specified application on the specified topic.
-	 * @param source Source identity
+	 * @param identity Source identity
 	 * @param topic The topic on which the message is sent
 	 * @param listener the listener previously registered with subscribe()
 	 * @return the new CompletionStage

@@ -89,7 +89,7 @@ public class FinApplication extends FinApiObject {
 
 	/**
 	 * Asynchronously returns an Application object that represents an existing application.
-	 * @param identity
+	 * @param identity The identity of the application.
 	 * @return new CompletionStage for the application instance.
 	 */
 	public CompletionStage<FinApplicationObject> wrap(Identity identity) {

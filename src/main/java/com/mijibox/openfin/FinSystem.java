@@ -31,7 +31,7 @@ public class FinSystem extends FinApiObject {
 
 	/**
 	 * Returns the version of the runtime. The version contains the major, minor, build and revision numbers.
-	 * @return
+	 * @return new CompletionStage of the version.
 	 */
 	public CompletionStage<String> getVersion() {
 		return this.finConnection.sendMessage("get-version", JsonValue.EMPTY_JSON_OBJECT).thenApply(ack ->{
@@ -46,7 +46,7 @@ public class FinSystem extends FinApiObject {
 	
 	/**
 	 * Retrieves the command line argument string that started OpenFin Runtime.
-	 * @return
+	 * @return new CompletionStage of the command line arguments.
 	 */
 	public CompletionStage<String> getCommandLineArguments() {
 		return this.finConnection.sendMessage("get-command-line-arguments").thenApply(ack ->{
@@ -59,16 +59,22 @@ public class FinSystem extends FinApiObject {
 		});
 	}
 	/**
-	 * Adds a listener to the end of the listeners array for the specified event.
+	 * Adds a listener to the end of the listeners list for the specified event.
 	 * 
-	 * @param eventType
-	 * @param listener
-	 * @return
+	 * @param eventType The type of the event.
+	 * @param listener The listener to be added.
+	 * @return new CompletionStage of the result in boolean, true if the listener is added at the end of the listener list.
 	 */
 	public CompletionStage<Boolean> addEventListener(String eventType, FinEventListener listener) {
 		return this.finConnection._subscriptionManager.addListener("system", eventType, listener);
 	}
 	
+	/**
+	 * Removes the listener from the listener list for the specified event.
+	 * @param eventType The type of the event.
+	 * @param listener The listener to be removed.
+	 * @return new CompletionStage of the result in boolean, true if the listener is removed from the listener list.
+	 */
 	public CompletionStage<Boolean> removeEventListener(String eventType, FinEventListener listener) {
 		return this.finConnection._subscriptionManager.removeListener("system", eventType, listener);
 	}
@@ -76,7 +82,7 @@ public class FinSystem extends FinApiObject {
 	/**
 	 * Clears cached data containing application resource files (images, HTML, JavaScript files), cookies, and items stored in the Local Storage.
 	 * 
-	 * @param opts
+	 * @param opts Options used to clear the cache.
 	 * @return A new CompletionStage for the task.
 	 */
 	public CompletionStage<Void> clearCache(ClearCacheOption opts) {
@@ -129,7 +135,7 @@ public class FinSystem extends FinApiObject {
 	/**
 	 * Retrieves an array of data for all applications.
 	 * 
-	 * @return
+	 * @return new CompletionStage of all application info.
 	 */
 	public CompletionStage<AppInfo[]> getAllApplications() {
 		return this.finConnection.sendMessage("get-all-applications").thenApply(ack ->{
@@ -149,7 +155,7 @@ public class FinSystem extends FinApiObject {
 
 	/**
 	 * Retrieves an array of data (name, ids, bounds) for all application windows.
-	 * @return
+	 * @return new CompletionStage of all window info.
 	 */
 	public CompletionStage<WinInfo[]> getAllWindows() {
 		return this.finConnection.sendMessage("get-all-windows").thenApply(ack ->{
@@ -169,7 +175,7 @@ public class FinSystem extends FinApiObject {
 
 	/**
 	 * Returns information about the running Runtime in an object.
-	 * @return
+	 * @return new CompletionStage of the runtime info.
 	 */
 	public CompletionStage<RuntimeInfo> getRuntimeInfo() {
 		return this.finConnection.sendMessage("get-runtime-info").thenApply(ack ->{
@@ -184,7 +190,7 @@ public class FinSystem extends FinApiObject {
 	
 	/**
 	 * Returns information about the running RVM in an object.
-	 * @return
+	 * @return new CompletionStage of RVM info.
 	 */
 	public CompletionStage<RvmInfo> getRvmInfo() {
 		return this.finConnection.sendMessage("get-rvm-info").thenApply(ack ->{
@@ -199,7 +205,7 @@ public class FinSystem extends FinApiObject {
 
 	/**
 	 * Returns the mouse in virtual screen coordinates.
-	 * @return
+	 * @return new CompletionStage of mouse position.
 	 */
 	public CompletionStage<Point> getMousePosition() {
 		return this.finConnection.sendMessage("get-mouse-position").thenApply(ack ->{
@@ -215,7 +221,7 @@ public class FinSystem extends FinApiObject {
 	
 	/**
 	 * Returns a unique identifier (UUID) provided by the machine.
-	 * @return
+	 * @return new CompletionStage of machine ID.
 	 */
 	public CompletionStage<String> getMachineId() {
 		return this.finConnection.sendMessage("get-machine-id").thenApply(ack ->{
@@ -230,7 +236,7 @@ public class FinSystem extends FinApiObject {
 	
 	/**
 	 * Opens the passed URL in the default web browser. It only supports http(s) and fin(s) protocols by default. File protocol and file path are not supported.
-	 * @param url
+	 * @param url The URL to open in the browser.
 	 * @return A new CompletionStage for the task.
 	 */
 	public CompletionStage<Void> openUrlWithBrowser(String url) {
@@ -241,6 +247,11 @@ public class FinSystem extends FinApiObject {
 		});
 	}
 	
+	/**
+	 * Sets the cookie.
+	 * @param cookie detail of the cookie.
+	 * @return new CompletionStage of the task.
+	 */
 	public CompletionStage<Void> setCookie(CookieDetails cookie) {
 		return this.finConnection.sendMessage("set-cookie", FinBeanUtils.toJsonObject(cookie)).thenAccept(ack ->{
 			if (!ack.isSuccess()) {
@@ -251,9 +262,9 @@ public class FinSystem extends FinApiObject {
 	
 	/**
 	 * Get additional info of cookies.
-	 * @param url
-	 * @param name
-	 * @return
+	 * @param url The URL of the cookie.
+	 * @param name The name of the cook.e
+	 * @return new CompletionStage of the matching cookies.
 	 */
 	public CompletionStage<List<CookieInfo>> getCookies(String url, String name) {
 		JsonObjectBuilder builder = Json.createObjectBuilder().add("url", url).add("name", name);
@@ -278,7 +289,7 @@ public class FinSystem extends FinApiObject {
 	 * name. This is the recommended way to uniquely identify a user / machine
 	 * combination.
 	 * 
-	 * @return
+	 * @return new CompletionStage of the unique user ID. 
 	 */
 	public CompletionStage<String> getUniqueUserId() {
 		return this.finConnection.sendMessage("get-unique-user-id").thenApply(ack ->{
@@ -293,7 +304,7 @@ public class FinSystem extends FinApiObject {
 	
 	/**
 	 * Retrieves an object that contains data about the monitor setup of the computer that the runtime is running on.
-	 * @return
+	 * @return new CompletionStage of the monitor info. 
 	 */
 	public CompletionStage<MonitorInfo> getMonitorInfo() {
 		return this.finConnection.sendMessage("get-monitor-info").thenApply(ack ->{
@@ -308,7 +319,7 @@ public class FinSystem extends FinApiObject {
 	
 	/**
 	 * Shows the Chromium Developer Tools for the specified window
-	 * @param identity
+	 * @param identity The identity of the window.
 	 * @return A new CompletionStage for the task.
 	 */
 	public CompletionStage<Void> showDeveloperTools(Identity identity) {
@@ -321,8 +332,8 @@ public class FinSystem extends FinApiObject {
 	
 	/**
 	 * Runs an executable or batch file. 
-	 * @param path
-	 * @param arguments
+	 * @param path The path of the executable.
+	 * @param arguments The arguments to be passed to the executable.
 	 * @return A new CompletionStage for the task.
 	 */
 	public CompletionStage<Void> launchExternalProcess(String path, String arguments) {

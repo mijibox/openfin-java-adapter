@@ -91,15 +91,21 @@ public class FinWindowObject extends FinWebContent {
 	}
 
 	/**
-	 * Adds a listener to the end of the listeners list for the specified event.
-	 * @param eventType
-	 * @param listener
-	 * @return
+	 * Adds a listener to the end of the listener list for the specified event.
+	 * @param eventType The type of the event.
+	 * @param listener The listener to be added.
+	 * @return new CompletionStage of the result in boolean, true if the listener is appended at the end of the listener list.
 	 */
 	public CompletionStage<Boolean> addEventListener(String eventType, FinEventListener listener) {
 		return this.finConnection._subscriptionManager.addListener(this.identity, "window", eventType, listener);
 	}
 
+	/**
+	 * Removes the listener from the listener list.
+	 * @param eventType The type of the event.
+	 * @param listener The listener to be removed.
+	 * @return new CompletionStage of the result in boolean, true if the listener is removed from the listener list.
+	 */
 	public CompletionStage<Boolean> removeEventListener(String eventType, FinEventListener listener) {
 		return this.finConnection._subscriptionManager.removeListener(this.identity, "window", eventType, listener);
 	}

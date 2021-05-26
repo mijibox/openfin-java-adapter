@@ -33,6 +33,7 @@ public class FinClipboard extends FinApiObject {
 
 	/**
 	 * Reads available formats for the clipboard type.
+	 * @param type The clipboard type.
 	 * @return A new CompletionStage for all available formats for the clipboard type.
 	 */
 	public CompletionStage<String[]> getAvailableFormats(String type) {
@@ -65,6 +66,7 @@ public class FinClipboard extends FinApiObject {
 	
 	/**
 	 * Reads the html content in the clipboard of specified type.
+	 * @param type The clipboard type.
 	 * @return A new CompletionStage for the html content in the clipboard.
 	 */
 	public CompletionStage<String> readHtml(String type) {
@@ -84,6 +86,7 @@ public class FinClipboard extends FinApiObject {
 
 	/**
 	 * Writes the html content to the clipboard. 
+	 * @param html The html content.
 	 * @return A new CompletionStage for the task.
 	 */
 	public CompletionStage<Void> writeHtml(String html) {
@@ -92,6 +95,8 @@ public class FinClipboard extends FinApiObject {
 	
 	/**
 	 * Writes the html content to the clipboard of specified type.
+	 * @param type The type of the clipboard.
+	 * @param html The html content.
 	 * @return A new CompletionStage for the task.
 	 */
 	public CompletionStage<Void> writeHtml(String type, String html) {
@@ -117,6 +122,7 @@ public class FinClipboard extends FinApiObject {
 	
 	/**
 	 * Reads the text content in the clipboard of specified type.
+	 * @param type The type of the clipboard.
 	 * @return A new CompletionStage for the text content in the clipboard.
 	 */
 	public CompletionStage<String> readText(String type) {
@@ -136,6 +142,7 @@ public class FinClipboard extends FinApiObject {
 
 	/**
 	 * Writes the text content to the clipboard. 
+	 * @param text The text content.
 	 * @return A new CompletionStage for the task.
 	 */
 	public CompletionStage<Void> writeText(String text) {
@@ -144,6 +151,8 @@ public class FinClipboard extends FinApiObject {
 	
 	/**
 	 * Writes the text content to the clipboard of specified type. 
+	 * @param type The type of the clipboard.
+	 * @param text The text content.
 	 * @return A new CompletionStage for the task.
 	 */
 	public CompletionStage<Void> writeText(String type, String text) {
@@ -169,6 +178,7 @@ public class FinClipboard extends FinApiObject {
 	
 	/**
 	 * Reads the RTF content in the clipboard of specified type.
+	 * @param type The type of the clipboard.
 	 * @return A new CompletionStage for the RTF content in the clipboard.
 	 */
 	public CompletionStage<String> readRtf(String type) {
@@ -188,6 +198,7 @@ public class FinClipboard extends FinApiObject {
 
 	/**
 	 * Writes the RTF content to the clipboard. 
+	 * @param rtf The RTF content.
 	 * @return A new CompletionStage for the task.
 	 */
 	public CompletionStage<Void> writeRtf(String rtf) {
@@ -196,6 +207,8 @@ public class FinClipboard extends FinApiObject {
 	
 	/**
 	 * Writes the RTF content to the clipboard of specified type. 
+	 * @param type The type of the clipboard.
+	 * @param rtf The RTF content.
 	 * @return A new CompletionStage for the task.
 	 */
 	public CompletionStage<Void> writeRtf(String type, String rtf) {
@@ -213,6 +226,10 @@ public class FinClipboard extends FinApiObject {
 
 	/**
 	 * Writes text, html and RTF content to the clipboard of specified type. 
+	 * @param type The type of the clipboard.
+	 * @param text The text content.
+	 * @param html The html content.
+	 * @param rtf The RTF content.
 	 * @return A new CompletionStage for the task.
 	 */
 	public CompletionStage<Void> write(String type, String text, String html, String rtf) {

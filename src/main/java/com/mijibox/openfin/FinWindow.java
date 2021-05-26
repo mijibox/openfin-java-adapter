@@ -14,8 +14,8 @@ public class FinWindow extends FinApiObject {
 
 	/**
 	 * Asynchronously returns a Window object that represents an existing window.
-	 * @param identity
-	 * @return
+	 * @param identity The identity of the window.
+	 * @return new CompletionStage of the window object.
 	 */
 	public CompletionStage<FinWindowObject> wrap(Identity identity) {
 		return CompletableFuture.supplyAsync(()->{

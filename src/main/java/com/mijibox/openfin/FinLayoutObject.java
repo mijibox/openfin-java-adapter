@@ -59,7 +59,7 @@ public class FinLayoutObject extends FinInstanceObject {
 
 	/**
 	 * Replaces a Platform window's layout with a preset layout arrangement using the existing Views attached to the window. The preset options are "columns", "grid", "rows", or "tabs".
-	 * @param presetType "columns", "grid", "rows", or "tabs".
+	 * @param type "columns", "grid", "rows", or "tabs".
 	 * @return New CompletionStage when the command is delivered.
 	 */
 	public CompletionStage<Void> applyPreset(PresetLayout type) {

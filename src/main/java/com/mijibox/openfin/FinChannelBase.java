@@ -129,7 +129,7 @@ public class FinChannelBase extends FinApiObject {
 
 	/**
 	 * Registers the middleware that fires after the action.
-	 * @param beforeAction Action to be executed after invoking the action.
+	 * @param afterAction Action to be executed after invoking the action.
 	 */
 	public void setAfterAction(FinChannelMiddleware afterAction) {
 		this.afterAction = afterAction;
