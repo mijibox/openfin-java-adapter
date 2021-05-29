@@ -1,0 +1,36 @@
+{
+	"runtime": {
+		"version": "stable",
+		"arguments": "--v=1"
+	},
+	"platform": {
+		"uuid": "InteropTest",
+		"autoShow": false
+	},
+	"snapshot": {
+		"windows": [
+			{
+				"saveWindowState": false,
+				"backgroundThrottling": true,
+				"layout": {
+					"content": [
+						{
+							"type": "row",
+							"id": "no-drop-target",
+							"content": [
+								{
+									"type": "component",
+									"componentName": "view",
+									"componentState": {
+										"name": "view-1622278364793-9325",
+										"url": "https://www.google.com"
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		]
+	}
+}
