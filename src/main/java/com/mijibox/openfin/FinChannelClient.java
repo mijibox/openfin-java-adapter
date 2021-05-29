@@ -83,7 +83,7 @@ public class FinChannelClient extends FinChannelBase {
 	 * @return A new CompletionStage of the action result returned from the provider.
 	 */
 	public CompletionStage<JsonValue> dispatch(String action, JsonValue payload) {
-		JsonObjectBuilder builder = Json.createObjectBuilder(FinBeanUtils.toJsonObject(this.providerIdentity))
+		JsonObjectBuilder builder = Json.createObjectBuilder(FinBeanUtils.toJsonObject(this.routingInfo))
 				.add("providerIdentity", FinBeanUtils.toJsonObject(providerIdentity))
 				.add("action", action);
 		if (payload != null) {

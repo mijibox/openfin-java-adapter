@@ -64,6 +64,7 @@ public class FinConnectionImpl implements FinRuntimeConnection, Listener {
 	FinClipboard _clipboard;
 	FinGlobalHotkey _globalHotkey;
 	FinInterApplicationBus _interApplicationBus;
+	FinInterop _interop;
 	FinLayout _layout;
 	FinPlatform _platform;
 	FinSystem _system;
@@ -155,6 +156,7 @@ public class FinConnectionImpl implements FinRuntimeConnection, Listener {
 		this._system = new FinSystem(this);
 		this._view = new FinView(this);
 		this._window = new FinWindow(this);
+		this._interop = new FinInterop(this);
 	}
 
 	@Override
