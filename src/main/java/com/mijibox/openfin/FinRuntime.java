@@ -49,6 +49,10 @@ public class FinRuntime {
 	 * API Object for OpenFin Window
 	 */
 	public final FinWindow Window;
+	/**
+	 * API Object for OpenFin Interop
+	 */
+	public final FinInterop Interop;
 	
 	final FinSubscriptionManager SubscriptionManager;
 	
@@ -66,6 +70,7 @@ public class FinRuntime {
 		this.Clipboard = this.finConnection._clipboard;
 		this.GlobalHotkey = this.finConnection._globalHotkey;
 		this.InterApplicationBus = this.finConnection._interApplicationBus;
+		this.Interop = this.finConnection._interop;
 		this.Layout = this.finConnection._layout;
 		this.Platform = this.finConnection._platform;
 		this.System = this.finConnection._system;
