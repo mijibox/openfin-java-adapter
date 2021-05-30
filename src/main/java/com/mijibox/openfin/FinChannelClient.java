@@ -31,7 +31,10 @@ public class FinChannelClient extends FinChannelBase {
 		super(finConnection);
 		this.channelDisconnectListeners = new CopyOnWriteArrayList<>();
 		this.routingInfo = routingInfo;
-		this.clientIdentity = FinBeanUtils.fromJsonString(FinBeanUtils.toJsonString(routingInfo), ClientIdentity.class);
+		this.clientIdentity = new ClientIdentity();
+		this.clientIdentity.setUuid(this.finConnection.getUuid());
+		this.clientIdentity.setName(this.finConnection.getUuid());
+		this.clientIdentity.setEndpointId(this.routingInfo.getEndpointId());
 		this.providerIdentity = FinBeanUtils.fromJsonString(FinBeanUtils.toJsonString(routingInfo), ProviderIdentity.class);
 	}
 

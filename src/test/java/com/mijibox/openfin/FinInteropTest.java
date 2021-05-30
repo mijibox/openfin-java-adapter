@@ -1,5 +1,6 @@
 package com.mijibox.openfin;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.UUID;
@@ -88,6 +89,48 @@ public class FinInteropTest {
 		TestUtils.runSync(app.quit());
 	}
 
+	@Test
+	public void joinContextGroupWithTarget() throws Exception {
+		String brokerName = "InteropTest";
+		FinApplicationObject app = TestUtils.runSync(fin.Application.startFromManifest(TestUtils.getTestManifestUrl("interop")));
+		FinInteropClient interopClient = TestUtils.runSync(fin.Interop.connect(brokerName));
+		FinInteropClient interopClient2 = TestUtils.runSync(fin.Interop.connect(brokerName));
+		assertNotNull(interopClient);
+		TestUtils.runSync(interopClient.joinContextGroup("red", interopClient2.getClientIdentity()));
+		TestUtils.runSync(app.quit());
+	}
+	
+	@Test
+	public void removeFromContextGroup() throws Exception {
+		String brokerName = "InteropTest";
+		FinApplicationObject app = TestUtils.runSync(fin.Application.startFromManifest(TestUtils.getTestManifestUrl("interop")));
+		FinInteropClient interopClient = TestUtils.runSync(fin.Interop.connect(brokerName));
+		assertNotNull(interopClient);
+		ClientIdentity[] clients1 = TestUtils.runSync(interopClient.getAllClientsInContextGroup("red"));
+		int cnt1 = clients1.length;
+		TestUtils.runSync(interopClient.joinContextGroup("red"));
+		ClientIdentity[] clients2 = TestUtils.runSync(interopClient.getAllClientsInContextGroup("red"));
+		int cnt2 = clients2.length;
+		assertEquals(cnt1 + 1, cnt2);
+		TestUtils.runSync(interopClient.removeFromContextGroup());
+		ClientIdentity[] clients3 = TestUtils.runSync(interopClient.getAllClientsInContextGroup("red"));
+		int cnt3 = clients3.length;
+		assertEquals(cnt1, cnt3);
+		TestUtils.runSync(app.quit());
+	}
+
+	@Test
+	public void removeFromContextGroupWithTarget() throws Exception {
+		String brokerName = "InteropTest";
+		FinApplicationObject app = TestUtils.runSync(fin.Application.startFromManifest(TestUtils.getTestManifestUrl("interop")));
+		FinInteropClient interopClient = TestUtils.runSync(fin.Interop.connect(brokerName));
+		FinInteropClient interopClient2 = TestUtils.runSync(fin.Interop.connect(brokerName));
+		assertNotNull(interopClient);
+		TestUtils.runSync(interopClient.joinContextGroup("red", interopClient2.getClientIdentity()));
+		TestUtils.runSync(interopClient.removeFromContextGroup(interopClient2.getClientIdentity()));
+		TestUtils.runSync(app.quit());
+	}
+	
 	@Test
 	public void setContext() throws Exception {
 		String brokerName = "InteropTest";

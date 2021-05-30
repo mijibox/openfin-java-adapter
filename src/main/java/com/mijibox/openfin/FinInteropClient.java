@@ -4,6 +4,7 @@ import java.util.concurrent.CompletionStage;
 
 import javax.json.Json;
 import javax.json.JsonArray;
+import javax.json.JsonObjectBuilder;
 
 import com.mijibox.openfin.bean.ClientIdentity;
 import com.mijibox.openfin.bean.Context;
@@ -14,15 +15,21 @@ public class FinInteropClient extends FinApiObject {
 
 	private FinChannelClient channelClient;
 	private String brokerName;
+	private ClientIdentity clientIdentity;
 	
 	FinInteropClient(FinConnectionImpl finConnection, String brokerName) {
 		super(finConnection);
 		this.brokerName = brokerName;
 	}
 	
+	public ClientIdentity getClientIdentity() {
+		return this.clientIdentity;
+	}
+	
 	CompletionStage<FinInteropClient> connect() {
 		return this.finConnection._channel.connect("interop-broker-" + this.brokerName).thenApply(cClient->{
 			this.channelClient = cClient;
+			this.clientIdentity = this.channelClient.getClientIdentity();
 			return this;
 		});
 	}
@@ -62,8 +69,31 @@ public class FinInteropClient extends FinApiObject {
 	}
 	
 	public CompletionStage<Void> joinContextGroup(String contextGroupId) {
+		return this.joinContextGroup(contextGroupId, null);
+	}
+	
+	public CompletionStage<Void> joinContextGroup(String contextGroupId, ClientIdentity target) {
+		JsonObjectBuilder builder = Json.createObjectBuilder().add("contextGroupId", contextGroupId);
+		if (target != null) {
+			builder.add("target", FinBeanUtils.toJsonObject(target));
+		}
 		return this.channelClient
-				.dispatch("joinContextGroup", Json.createObjectBuilder().add("contextGroupId", contextGroupId).build())
+				.dispatch("joinContextGroup", builder.build())
+				.thenAccept(result -> {
+				});
+	}
+	
+	public CompletionStage<Void> removeFromContextGroup() {
+		return this.removeFromContextGroup(null);
+	}
+	
+	public CompletionStage<Void> removeFromContextGroup(ClientIdentity target) {
+		JsonObjectBuilder builder = Json.createObjectBuilder();
+		if (target != null) {
+			builder.add("target", FinBeanUtils.toJsonObject(target));
+		}
+		return this.channelClient
+				.dispatch("removeFromContextGroup", builder.build())
 				.thenAccept(result -> {
 				});
 	}
