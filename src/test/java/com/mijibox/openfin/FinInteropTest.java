@@ -3,7 +3,8 @@ package com.mijibox.openfin;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -14,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import com.mijibox.openfin.bean.ClientIdentity;
 import com.mijibox.openfin.bean.Context;
 import com.mijibox.openfin.bean.ContextGroupInfo;
-import com.mijibox.openfin.bean.FinBeanUtils;
 
 public class FinInteropTest {
 
@@ -143,6 +143,64 @@ public class FinInteropTest {
 		context.setName("MyName");
 		context.setType("MyType");
 		TestUtils.runSync(interopClient.setContext(context));
+		TestUtils.runSync(app.quit());
+	}
+	
+	@Test
+	public void addContextListener() throws Exception {
+		String brokerName = "InteropTest";
+		FinApplicationObject app = TestUtils.runSync(fin.Application.startFromManifest(TestUtils.getTestManifestUrl("interop")));
+		FinInteropClient interopClient = TestUtils.runSync(fin.Interop.connect(brokerName));
+		assertNotNull(interopClient);
+		TestUtils.runSync(interopClient.joinContextGroup("red"));
+		Context context = new Context();
+		String id = "MyId";
+		String name = "MyName";
+		String type = "MyType";
+		context.setId(id);
+		context.setName(name);
+		context.setType(type);
+		CompletableFuture<?> listenerFuture = new CompletableFuture<>();
+		TestUtils.runSync(interopClient.addContextListener(ctx->{
+			if (id.equals(ctx.getId())
+					&& name.equals(ctx.getName())
+					&& type.equals(ctx.getType())) {
+				listenerFuture.complete(null);
+			}
+		}));
+		TestUtils.runSync(interopClient.setContext(context));
+		TestUtils.runSync(listenerFuture, 5);
+		TestUtils.runSync(app.quit());
+	}
+
+	@Test
+	public void removeContextListener() throws Exception {
+		String brokerName = "InteropTest";
+		FinApplicationObject app = TestUtils.runSync(fin.Application.startFromManifest(TestUtils.getTestManifestUrl("interop")));
+		FinInteropClient interopClient = TestUtils.runSync(fin.Interop.connect(brokerName));
+		assertNotNull(interopClient);
+		TestUtils.runSync(interopClient.joinContextGroup("red"));
+		Context context = new Context();
+		String id = "MyId";
+		String name = "MyName";
+		String type = "MyType";
+		context.setId(id);
+		context.setName(name);
+		context.setType(type);
+		AtomicInteger counter = new AtomicInteger(0);
+		FinContextListener listener = ctx->{
+			if (id.equals(ctx.getId())
+					&& name.equals(ctx.getName())
+					&& type.equals(ctx.getType())) {
+				counter.incrementAndGet();
+			}
+		};
+		TestUtils.runSync(interopClient.addContextListener(listener));
+		TestUtils.runSync(interopClient.setContext(context));
+		TestUtils.runSync(interopClient.removeContextListener(listener));
+		TestUtils.runSync(interopClient.setContext(context));
+		Thread.sleep(1000);
+		assertEquals(1, counter.get());
 		TestUtils.runSync(app.quit());
 	}
 }

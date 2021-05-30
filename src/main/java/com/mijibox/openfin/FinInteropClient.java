@@ -1,6 +1,11 @@
 package com.mijibox.openfin;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -16,10 +21,12 @@ public class FinInteropClient extends FinApiObject {
 	private FinChannelClient channelClient;
 	private String brokerName;
 	private ClientIdentity clientIdentity;
+	private ConcurrentHashMap<String, List<FinContextListener>> contextTypeListenersMap;
 	
 	FinInteropClient(FinConnectionImpl finConnection, String brokerName) {
 		super(finConnection);
 		this.brokerName = brokerName;
+		this.contextTypeListenersMap = new ConcurrentHashMap<>();
 	}
 	
 	public ClientIdentity getClientIdentity() {
@@ -104,5 +111,68 @@ public class FinInteropClient extends FinApiObject {
 				.thenAccept(result -> {
 				});
 	}
+	
+	public CompletionStage<Void> addContextListener(FinContextListener listener) {
+		return this.addContextListener(null, listener);
+	}
 
+	public CompletionStage<Void> addContextListener(String contextType, FinContextListener listener) {
+		String contextTypeKey = contextType == null ? "*" : contextType;
+		AtomicBoolean first = new AtomicBoolean(false);
+		List<FinContextListener> listeners = this.contextTypeListenersMap.computeIfAbsent(contextTypeKey, key->{
+			first.set(true);
+			return new ArrayList<>();
+		});
+		listeners.add(listener);
+		if (first.get()) {
+			String handlerId = "contextHandler-" + contextTypeKey;
+			this.channelClient.register(handlerId, (payload, senderIdentity)->{
+				Context context = FinBeanUtils.fromJsonObject(payload.asJsonObject(), Context.class);
+				listeners.forEach(l->{
+					l.onContext(context);
+				});
+				return null;
+			});
+			JsonObjectBuilder builder = Json.createObjectBuilder().add("handlerId", handlerId);
+			if (contextType != null) {
+				builder.add("contextType", contextType);
+			}
+			return this.channelClient.dispatch("contextHandlerRegistered", builder.build()).thenAccept(result->{
+			});
+		}
+		else {
+			return CompletableFuture.completedFuture(null);
+		}
+	}
+
+	public CompletionStage<Void> removeContextListener(FinContextListener listener) {
+		return this.removeContextListener(null, listener);
+	}
+
+	public CompletionStage<Void> removeContextListener(String contextType, FinContextListener listener) {
+		String contextTypeKey = contextType == null ? "*" : contextType;
+		AtomicBoolean last = new AtomicBoolean(false);
+		this.contextTypeListenersMap.computeIfPresent(contextTypeKey, (key, listeners)->{
+			boolean removed = listeners.remove(listener);
+			if (removed && listeners.size() == 0) {
+				last.set(true);
+				return null;
+			}
+			else {
+				return listeners;
+			}
+		});
+		
+		if (last.get()) {
+			String handlerId = "contextHandler-" + contextTypeKey;
+			this.channelClient.remove(handlerId);
+			return this.channelClient
+					.dispatch("removeContextHandler", Json.createObjectBuilder().add("handlerId", handlerId).build())
+					.thenAccept(result -> {
+					});
+		}
+		else {
+			return CompletableFuture.completedFuture(null);
+		}
+	}
 }
