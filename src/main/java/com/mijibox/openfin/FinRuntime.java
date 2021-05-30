@@ -49,7 +49,9 @@ public class FinRuntime {
 	 * API Object for OpenFin Window
 	 */
 	public final FinWindow Window;
-	
+	/**
+	 * API Object for OpenFin Interop
+	 */
 	public final FinInterop Interop;
 	
 	final FinSubscriptionManager SubscriptionManager;

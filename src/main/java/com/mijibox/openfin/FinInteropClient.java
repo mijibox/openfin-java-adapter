@@ -29,6 +29,10 @@ public class FinInteropClient extends FinApiObject {
 		this.contextTypeListenersMap = new ConcurrentHashMap<>();
 	}
 	
+	/**
+	 * Gets the client identity of this interop client.
+	 * @return The client identity.
+	 */
 	public ClientIdentity getClientIdentity() {
 		return this.clientIdentity;
 	}
@@ -41,6 +45,10 @@ public class FinInteropClient extends FinApiObject {
 		});
 	}
 	
+	/**
+	 * Returns the Interop-Broker-defined context groups available for an entity to join.
+	 * @return new CompletionStage of an array of the context group info.
+	 */
 	public CompletionStage<ContextGroupInfo[]> getContextGroups() {
 		return this.channelClient
 				.dispatch("getContextGroups")
@@ -54,6 +62,11 @@ public class FinInteropClient extends FinApiObject {
 				});
 	}
 	
+	/**
+	 * Gets display info for a context group.
+	 * @param contextGroupId The id of context group you wish to get display info for.
+	 * @return new CompletionStage of the context group info.
+	 */
 	public CompletionStage<ContextGroupInfo> getInfoForContextGroup(String contextGroupId) {
 		return this.channelClient
 				.dispatch("getInfoForContextGroup", Json.createObjectBuilder().add("contextGroupId", contextGroupId).build())
@@ -62,6 +75,11 @@ public class FinInteropClient extends FinApiObject {
 				});
 	}
 	
+	/**
+	 * Gets all clients for a context group. 
+	 * @param contextGroupId The id of context group you wish to get clients for.
+	 * @return new CompletionStage of all clients in the context group.
+	 */
 	public CompletionStage<ClientIdentity[]> getAllClientsInContextGroup(String contextGroupId) {
 		return this.channelClient
 				.dispatch("getAllClientsInContextGroup", Json.createObjectBuilder().add("contextGroupId", contextGroupId).build())
@@ -75,10 +93,21 @@ public class FinInteropClient extends FinApiObject {
 				});
 	}
 	
+	/**
+	 * Joins this interop client to the context group.
+	 * @param contextGroupId The id of context group.
+	 * @return new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> joinContextGroup(String contextGroupId) {
 		return this.joinContextGroup(contextGroupId, null);
 	}
 	
+	/**
+	 * Joins specified interop client to the context group.
+	 * @param contextGroupId The id of context group.
+	 * @param target The identity of target interop client.
+	 * @return new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> joinContextGroup(String contextGroupId, ClientIdentity target) {
 		JsonObjectBuilder builder = Json.createObjectBuilder().add("contextGroupId", contextGroupId);
 		if (target != null) {
@@ -90,10 +119,19 @@ public class FinInteropClient extends FinApiObject {
 				});
 	}
 	
+	/**
+	 * Removes this interop client from the context group which currently joined..
+	 * @return new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> removeFromContextGroup() {
 		return this.removeFromContextGroup(null);
 	}
 	
+	/**
+	 * Removes specified interop client from the context group which currently joined.
+	 * @param target The identity of target interop client.
+	 * @return new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> removeFromContextGroup(ClientIdentity target) {
 		JsonObjectBuilder builder = Json.createObjectBuilder();
 		if (target != null) {
@@ -105,6 +143,11 @@ public class FinInteropClient extends FinApiObject {
 				});
 	}
 	
+	/**
+	 * Sets a context for the context group.
+	 * @param context New context to set.
+	 * @return new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> setContext(Context context) {
 		return this.channelClient
 				.dispatch("setContext", Json.createObjectBuilder().add("context", FinBeanUtils.toJsonObject(context)).build())
@@ -112,10 +155,21 @@ public class FinInteropClient extends FinApiObject {
 				});
 	}
 	
+	/**
+	 * Add a context listener for incoming context.
+	 * @param listener The context listener to be added.
+	 * @return new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> addContextListener(FinContextListener listener) {
 		return this.addContextListener(null, listener);
 	}
 
+	/**
+	 * Add a context listener for incoming context of specified context type.
+	 * @param contextType The type of context the listener listens to.
+	 * @param listener The context listener to be added.
+	 * @return new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> addContextListener(String contextType, FinContextListener listener) {
 		String contextTypeKey = contextType == null ? "*" : contextType;
 		AtomicBoolean first = new AtomicBoolean(false);
@@ -145,10 +199,21 @@ public class FinInteropClient extends FinApiObject {
 		}
 	}
 
+	/**
+	 * Removes the context listener from the listener list.
+	 * @param listener The context listener to be removed..
+	 * @return new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> removeContextListener(FinContextListener listener) {
 		return this.removeContextListener(null, listener);
 	}
 
+	/**
+	 * Removes the context listener of specified context type from the listener list.
+	 * @param contextType The type of context the listener listens to.
+	 * @param listener The context listener to be removed.
+	 * @return new CompletionStage for the task.
+	 */
 	public CompletionStage<Void> removeContextListener(String contextType, FinContextListener listener) {
 		String contextTypeKey = contextType == null ? "*" : contextType;
 		AtomicBoolean last = new AtomicBoolean(false);
